@@ -92,6 +92,6 @@ class FileExportService {
     final startDateStr = startDate.toString().split(' ')[0];
     final endDateStr = endDate.toString().split(' ')[0];
 
-    return 'attendance_report_$institutionId\_$classId\_$startDateStr\_$endDateStr${getFileExtension(format)}';
+    return 'attendance_report_${institutionId}_${classId}_${startDateStr}_${endDateStr}${getFileExtension(format)}';
   }
 }
