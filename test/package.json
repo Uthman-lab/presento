@@ -1,0 +1,23 @@
+{
+  "name": "task-master-tot-security-tests",
+  "version": "1.0.0",
+  "description": "Security testing for Task Master TOT Firestore rules",
+  "main": "index.js",
+  "scripts": {
+    "test": "jest",
+    "test:security": "jest test/firestore_security_rules.test.js",
+    "test:watch": "jest --watch"
+  },
+  "dependencies": {
+    "@firebase/rules-unit-testing": "^2.0.5",
+    "firebase": "^10.7.0"
+  },
+  "devDependencies": {
+    "jest": "^29.7.0",
+    "@types/jest": "^29.5.8"
+  },
+  "jest": {
+    "testEnvironment": "node",
+    "setupFilesAfterEnv": ["<rootDir>/test/setup.js"]
+  }
+} 

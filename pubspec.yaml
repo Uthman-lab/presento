@@ -1,5 +1,5 @@
 name: task_master_tot
-description: "A new Flutter project."
+description: "A Flutter attendance system with Clean Architecture and Firebase backend."
 # The following line prevents the package from being accidentally published to
 # pub.dev using `flutter pub publish`. This is preferred for private packages.
 publish_to: 'none' # Remove this line if you wish to publish to pub.dev
@@ -35,6 +35,41 @@ dependencies:
   # Use with the CupertinoIcons class for iOS style icons.
   cupertino_icons: ^1.0.8
 
+  # Firebase Dependencies
+  firebase_core: ^3.6.0
+  firebase_auth: ^5.3.1
+  cloud_firestore: ^5.4.3
+  firebase_storage: ^12.3.1
+
+  # State Management
+  flutter_bloc: ^8.1.6
+  equatable: ^2.0.5
+
+  # Functional Programming & Error Handling
+  dartz: ^0.10.1
+
+  # Dependency Injection
+  get_it: ^7.7.0
+
+  # UI & Navigation
+  go_router: ^14.6.2
+  flutter_svg: ^2.0.10+1
+
+  # Utilities
+  intl: ^0.19.0
+  image_picker: ^1.1.2
+  shared_preferences: ^2.3.3
+  connectivity_plus: ^6.0.1
+
+  # Charts and analytics
+  fl_chart: ^0.69.0
+
+  # File handling and sharing
+  path_provider: ^2.1.1
+  share_plus: ^7.2.1
+  permission_handler: ^11.0.1
+  cloud_functions: ^5.6.2
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
@@ -45,6 +80,17 @@ dev_dependencies:
   # package. See that file for information about deactivating specific lint
   # rules and activating additional ones.
   flutter_lints: ^5.0.0
+
+  # Testing
+  bloc_test: ^9.1.6
+  mockito: ^5.4.4
+  build_runner: ^2.4.13
+
+  # Code Generation
+  freezed: ^2.5.7
+  freezed_annotation: ^2.4.4
+  json_annotation: ^4.9.0
+  json_serializable: ^6.8.0
 
 # For information on the generic Dart part of this file, see the
 # following page: https://dart.dev/tools/pub/pubspec
