@@ -4,24 +4,24 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:go_router/go_router.dart';
 import 'firebase_options.dart';
 import 'core/di/injection_container.dart' as di;
-import 'features/auth/presentation/bloc/auth_bloc.dart';
-import 'features/class/presentation/bloc/class_management_bloc.dart';
-import 'features/student/presentation/bloc/student_management_bloc.dart';
-import 'features/attendance/presentation/bloc/attendance_bloc.dart';
-import 'features/attendance/presentation/bloc/attendance_report_bloc.dart';
+import 'ui/auth/bloc/auth_bloc.dart';
+import 'ui/class/bloc/class_management_bloc.dart';
+import 'ui/student/bloc/student_management_bloc.dart';
+import 'ui/attendance/bloc/attendance_bloc.dart';
+import 'ui/attendance/bloc/attendance_report_bloc.dart';
 
-import 'features/dashboard/presentation/bloc/dashboard_bloc.dart';
-import 'features/auth/presentation/pages/institution_selection_screen.dart';
-import 'features/auth/presentation/pages/login_screen.dart';
-import 'features/dashboard/presentation/pages/dashboard_screen.dart';
-import 'features/dashboard/presentation/pages/role_based_dashboard_screen.dart';
-import 'features/class/presentation/pages/class_management_screen.dart';
-import 'features/student/presentation/pages/student_management_screen.dart';
-import 'features/attendance/presentation/pages/attendance_taking_screen.dart';
-import 'features/attendance/presentation/pages/attendance_report_screen.dart';
+import 'ui/dashboard/bloc/dashboard_bloc.dart';
+import 'ui/auth/screens/institution_selection_screen.dart';
+import 'ui/auth/screens/login_screen.dart';
+import 'ui/dashboard/screens/dashboard_screen.dart';
+import 'ui/dashboard/screens/role_based_dashboard_screen.dart';
+import 'ui/class/screens/class_management_screen.dart';
+import 'ui/student/screens/student_management_screen.dart';
+import 'ui/attendance/screens/attendance_taking_screen.dart';
+import 'ui/attendance/screens/attendance_report_screen.dart';
 
-import 'features/auth/domain/entities/institution.dart';
-import 'features/auth/domain/entities/user.dart';
+import 'modules/auth/domain/entities/institution.dart';
+import 'modules/auth/domain/entities/user.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
