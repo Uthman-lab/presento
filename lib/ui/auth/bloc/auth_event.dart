@@ -5,7 +5,6 @@ class AuthEvent with _$AuthEvent {
   const factory AuthEvent.loginRequested(
     String email,
     String password,
-    String institutionId,
   ) = AuthLoginRequested;
   const factory AuthEvent.logoutRequested() = AuthLogoutRequested;
   const factory AuthEvent.authStatusChanged() = AuthStatusChanged;

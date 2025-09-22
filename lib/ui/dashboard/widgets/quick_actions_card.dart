@@ -88,4 +88,3 @@ class QuickAction {
 
   QuickAction(this.label, this.icon, this.route);
 }
-

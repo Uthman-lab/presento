@@ -5,8 +5,7 @@ import '../bloc/auth_bloc.dart';
 import '../../../modules/auth/domain/entities/institution.dart';
 
 class LoginScreen extends StatefulWidget {
-  final Institution institution;
-  const LoginScreen({super.key, required this.institution});
+  const LoginScreen({super.key,});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -20,7 +19,7 @@ class _LoginScreenState extends State<LoginScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      appBar: AppBar(title: Text('Login to ${widget.institution.name}')),
+      appBar: AppBar(title: Text('Login')),
       body: BlocListener<AuthBloc, AuthState>(
         listener: (context, state) {
           state.maybeWhen(
@@ -77,7 +76,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         AuthEvent.loginRequested(
                           _emailController.text,
                           _passwordController.text,
-                          widget.institution.id,
+                         
                         ),
                       );
                     }

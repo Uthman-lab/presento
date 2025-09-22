@@ -41,8 +41,8 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     emit(const AuthState.loading());
     final result = await _login(
       event.email,
-      event.password,
-      event.institutionId,
+      event.password
+
     );
     result.fold(
       (failure) => emit(AuthState.error(failure)),

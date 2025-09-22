@@ -8,8 +8,8 @@ abstract class AuthRepository {
   /// Login with email, password, and institution
   Future<Either<Failure, User>> login(
     String email,
-    String password,
-    String institutionId,
+    String password
+    
   );
 
   /// Logout the current user

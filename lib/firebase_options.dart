@@ -27,10 +27,7 @@ class DefaultFirebaseOptions {
       case TargetPlatform.macOS:
         return macos;
       case TargetPlatform.windows:
-        throw UnsupportedError(
-          'DefaultFirebaseOptions have not been configured for windows - '
-          'you can reconfigure this by running the FlutterFire CLI again.',
-        );
+        return windows;
       case TargetPlatform.linux:
         throw UnsupportedError(
           'DefaultFirebaseOptions have not been configured for linux - '
@@ -44,37 +41,48 @@ class DefaultFirebaseOptions {
   }
 
   static const FirebaseOptions web = FirebaseOptions(
-    apiKey: 'AIzaSyC-placeholder-key-for-development-only',
-    appId: '1:123456789012:web:abcdef1234567890',
-    messagingSenderId: '123456789012',
-    projectId: 'task-master-attendance-dev',
-    authDomain: 'task-master-attendance-dev.firebaseapp.com',
-    storageBucket: 'task-master-attendance-dev.appspot.com',
+    apiKey: 'AIzaSyDHImzC7tVH0RcmEsiEmaJTqf04cDoHoeE',
+    appId: '1:586528260468:web:a37210a0ceb7538e9b2c21',
+    messagingSenderId: '586528260468',
+    projectId: 'schattendancepproject',
+    authDomain: 'schattendancepproject.firebaseapp.com',
+    storageBucket: 'schattendancepproject.firebasestorage.app',
+    measurementId: 'G-D3W86516ML',
   );
 
   static const FirebaseOptions android = FirebaseOptions(
-    apiKey: 'AIzaSyC-placeholder-key-for-development-only',
-    appId: '1:123456789012:android:abcdef1234567890',
-    messagingSenderId: '123456789012',
-    projectId: 'task-master-attendance-dev',
-    storageBucket: 'task-master-attendance-dev.appspot.com',
+    apiKey: 'AIzaSyBJZY5kOLc3Ce8UqKLrAMgcZGA1L755qdE',
+    appId: '1:586528260468:android:f635b0f3688448979b2c21',
+    messagingSenderId: '586528260468',
+    projectId: 'schattendancepproject',
+    storageBucket: 'schattendancepproject.firebasestorage.app',
   );
 
   static const FirebaseOptions ios = FirebaseOptions(
-    apiKey: 'AIzaSyC-placeholder-key-for-development-only',
-    appId: '1:123456789012:ios:abcdef1234567890',
-    messagingSenderId: '123456789012',
-    projectId: 'task-master-attendance-dev',
-    storageBucket: 'task-master-attendance-dev.appspot.com',
+    apiKey: 'AIzaSyDFUm6nR_BC0wnGbsrZZAJ7tJpH63Qo7as',
+    appId: '1:586528260468:ios:dc5c04af7a74c9029b2c21',
+    messagingSenderId: '586528260468',
+    projectId: 'schattendancepproject',
+    storageBucket: 'schattendancepproject.firebasestorage.app',
     iosBundleId: 'com.example.taskMasterTot',
   );
 
   static const FirebaseOptions macos = FirebaseOptions(
-    apiKey: 'AIzaSyC-placeholder-key-for-development-only',
-    appId: '1:123456789012:ios:abcdef1234567890',
-    messagingSenderId: '123456789012',
-    projectId: 'task-master-attendance-dev',
-    storageBucket: 'task-master-attendance-dev.appspot.com',
+    apiKey: 'AIzaSyDFUm6nR_BC0wnGbsrZZAJ7tJpH63Qo7as',
+    appId: '1:586528260468:ios:dc5c04af7a74c9029b2c21',
+    messagingSenderId: '586528260468',
+    projectId: 'schattendancepproject',
+    storageBucket: 'schattendancepproject.firebasestorage.app',
     iosBundleId: 'com.example.taskMasterTot',
+  );
+
+  static const FirebaseOptions windows = FirebaseOptions(
+    apiKey: 'AIzaSyDHImzC7tVH0RcmEsiEmaJTqf04cDoHoeE',
+    appId: '1:586528260468:web:8b8c760ec905c29c9b2c21',
+    messagingSenderId: '586528260468',
+    projectId: 'schattendancepproject',
+    authDomain: 'schattendancepproject.firebaseapp.com',
+    storageBucket: 'schattendancepproject.firebasestorage.app',
+    measurementId: 'G-BERNHHEJB6',
   );
 }

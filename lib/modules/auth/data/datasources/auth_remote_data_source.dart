@@ -6,7 +6,7 @@ import '../models/institution_model.dart';
 /// Abstract interface for remote authentication data source
 abstract class AuthRemoteDataSource {
   /// Login with email, password, and institution
-  Future<UserModel> login(String email, String password, String institutionId);
+  Future<UserModel> login(String email, String password);
 
   /// Logout the current user
   Future<void> logout();
@@ -39,30 +39,28 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
        _firestore = firestore;
 
   @override
-  Future<UserModel> login(
-    String email,
-    String password,
-    String institutionId,
-  ) async {
+  Future<UserModel> login(String email, String password) async {
     try {
       final userCredential = await _auth.signInWithEmailAndPassword(
-        email: email,
-        password: password,
+        email: email.trim(),
+        password: password.trim(),
       );
       final user = userCredential.user;
       if (user == null) {
         throw Exception('User not found');
       }
-      final userDoc = await _firestore
-          .collection('institutions')
-          .doc(institutionId)
+
+      // Fetch profile from top-level 'users' collection by email
+      final snap = await _firestore
           .collection('users')
-          .doc(user.uid)
+          .where('email', isEqualTo: email.trim())
+          .limit(1)
           .get();
-      if (!userDoc.exists) {
-        throw Exception('User not found in this institution');
+
+      if (snap.docs.isEmpty) {
+        throw Exception('User profile not found');
       }
-      return UserModel.fromJson(userDoc.data()!);
+      return UserModel.fromJson(snap.docs.first.data());
     } catch (e) {
       rethrow;
     }

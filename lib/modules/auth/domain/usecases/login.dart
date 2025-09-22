@@ -13,8 +13,8 @@ class Login {
   Future<Either<Failure, User>> call(
     String email,
     String password,
-    String institutionId,
+   
   ) async {
-    return await repository.login(email, password, institutionId);
+    return await repository.login(email, password);
   }
 }

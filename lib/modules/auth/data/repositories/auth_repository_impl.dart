@@ -23,14 +23,12 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Either<Failure, User>> login(
     String email,
     String password,
-    String institutionId,
   ) async {
     if (await networkInfo.isConnected) {
       try {
         final remoteUser = await remoteDataSource.login(
           email,
           password,
-          institutionId,
         );
         localDataSource.cacheUser(remoteUser);
         return Right(remoteUser.toDomain());
