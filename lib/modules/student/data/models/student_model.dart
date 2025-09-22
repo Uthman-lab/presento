@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import '../../domain/entities/student.dart';
 
 /// Student data model for JSON serialization
@@ -20,6 +21,9 @@ class StudentModel extends Student {
 
   /// Create StudentModel from JSON
   factory StudentModel.fromJson(Map<String, dynamic> json) {
+    final dob = json['dateOfBirth'];
+    final created = json['createdAt'];
+    final updated = json['updatedAt'];
     return StudentModel(
       id: json['id'] as String,
       studentId: json['studentId'] as String,
@@ -30,12 +34,16 @@ class StudentModel extends Student {
       phone: json['phone'] as String?,
       address: json['address'] as String?,
       profilePictureUrl: json['profilePictureUrl'] as String?,
-      dateOfBirth: json['dateOfBirth'] != null
-          ? DateTime.parse(json['dateOfBirth'] as String)
-          : null,
+      dateOfBirth: dob == null
+          ? null
+          : (dob is String ? DateTime.parse(dob) : (dob as Timestamp).toDate()),
       emergencyContact: json['emergencyContact'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: created is String
+          ? DateTime.parse(created)
+          : (created as Timestamp).toDate(),
+      updatedAt: updated is String
+          ? DateTime.parse(updated)
+          : (updated as Timestamp).toDate(),
     );
   }
 

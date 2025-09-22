@@ -7,26 +7,127 @@
  * See a full list of supported triggers at https://firebase.google.com/docs/functions
  */
 
-const {setGlobalOptions} = require("firebase-functions");
-const {onRequest} = require("firebase-functions/https");
-const logger = require("firebase-functions/logger");
+const functions = require("firebase-functions");
+const admin = require("firebase-admin");
 
-// For cost control, you can set the maximum number of containers that can be
-// running at the same time. This helps mitigate the impact of unexpected
-// traffic spikes by instead downgrading performance. This limit is a
-// per-function limit. You can override the limit for each function using the
-// `maxInstances` option in the function's options, e.g.
-// `onRequest({ maxInstances: 5 }, (req, res) => { ... })`.
-// NOTE: setGlobalOptions does not apply to functions using the v1 API. V1
-// functions should each use functions.runWith({ maxInstances: 10 }) instead.
-// In the v1 API, each function can only serve one request per container, so
-// this will be the maximum concurrent request count.
-setGlobalOptions({ maxInstances: 10 });
+// Initialize Firebase Admin SDK
+admin.initializeApp();
 
-// Create and deploy your first functions
-// https://firebase.google.com/docs/functions/get-started
+/**
+ * Cloud Function to get attendance analytics data
+ * Called by the Flutter app's DashboardBloc
+ */
+exports.getAttendanceAnalytics = functions.https.onCall(async (data, context) => {
+  try {
+    // Extract parameters from the request
+    const { institutionId, classId, startDate, endDate, aggregationType } = data || {};
 
-// exports.helloWorld = onRequest((request, response) => {
-//   logger.info("Hello logs!", {structuredData: true});
-//   response.send("Hello from Firebase!");
-// });
+    // Validate required parameters
+    if (!institutionId || !startDate || !endDate) {
+      console.warn("Missing required parameters", { institutionId, startDate, endDate });
+      return { 
+        success: false, 
+        error: "Missing required parameters: institutionId, startDate, endDate" 
+      };
+    }
+
+    console.log("Getting attendance analytics", { 
+      institutionId, 
+      classId, 
+      startDate, 
+      endDate, 
+      aggregationType 
+    });
+
+    const db = admin.firestore();
+    
+    // Build the query
+    let query = db
+      .collection("attendance")
+      .where("institutionId", "==", institutionId)
+      .where("date", ">=", new Date(startDate))
+      .where("date", "<=", new Date(endDate));
+
+    // Add class filter if specified and not "all"
+    if (classId && classId !== "all") {
+      query = query.where("classId", "==", classId);
+    }
+
+    // Execute the query
+    const snapshot = await query.get();
+    
+    console.log(`Found ${snapshot.size} attendance records`);
+
+    // Aggregate data by date
+    const dateBuckets = {};
+    
+    // Helper function to get date key (YYYY-MM-DD)
+    const getDateKey = (timestamp) => {
+      const date = (timestamp && timestamp.toDate) ? timestamp.toDate() : new Date(timestamp);
+      return date.toISOString().slice(0, 10);
+    };
+    
+    // Helper function to get short date (MM-DD)
+    const getShortDate = (dateKey) => dateKey.slice(5);
+
+    // Process each attendance record
+    snapshot.forEach(doc => {
+      const data = doc.data();
+      const dateKey = getDateKey(data.date);
+      
+      // Initialize bucket if it doesn't exist
+      if (!dateBuckets[dateKey]) {
+        dateBuckets[dateKey] = {
+          date: dateKey,
+          shortDate: getShortDate(dateKey),
+          presentCount: 0,
+          absentCount: 0,
+          lateCount: 0,
+          excusedCount: 0,
+          totalCount: 0,
+        };
+      }
+      
+      // Increment total count
+      dateBuckets[dateKey].totalCount += 1;
+      
+      // Increment specific status count
+      switch (data.status) {
+        case "present":
+          dateBuckets[dateKey].presentCount += 1;
+          break;
+        case "absent":
+          dateBuckets[dateKey].absentCount += 1;
+          break;
+        case "late":
+          dateBuckets[dateKey].lateCount += 1;
+          break;
+        case "excused":
+          dateBuckets[dateKey].excusedCount += 1;
+          break;
+        default:
+          console.warn(`Unknown attendance status: ${data.status}`);
+          break;
+      }
+    });
+
+    // Convert buckets to sorted array
+    const analyticsData = Object.keys(dateBuckets)
+      .sort()
+      .map(dateKey => dateBuckets[dateKey]);
+
+    console.log(`Returning analytics for ${analyticsData.length} days`);
+
+    return { 
+      success: true, 
+      data: analyticsData 
+    };
+
+  } catch (error) {
+    console.error("Error in getAttendanceAnalytics", error);
+    return { 
+      success: false, 
+      error: error?.message || "An unexpected error occurred" 
+    };
+  }
+});

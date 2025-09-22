@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import '../../domain/entities/attendance.dart';
 
 /// Attendance data model for JSON serialization
@@ -17,19 +18,28 @@ class AttendanceModel extends Attendance {
 
   /// Create AttendanceModel from JSON
   factory AttendanceModel.fromJson(Map<String, dynamic> json) {
+    final dateVal = json['date'];
+    final created = json['createdAt'];
+    final updated = json['updatedAt'];
     return AttendanceModel(
       id: json['id'] as String,
       studentId: json['studentId'] as String,
       classId: json['classId'] as String,
       institutionId: json['institutionId'] as String,
-      date: DateTime.parse(json['date'] as String),
+      date: dateVal is String
+          ? DateTime.parse(dateVal)
+          : (dateVal as Timestamp).toDate(),
       status: AttendanceStatus.values.firstWhere(
         (e) => e.toString() == 'AttendanceStatus.${json['status']}',
       ),
       notes: json['notes'] as String?,
       markedBy: json['markedBy'] as String,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: created is String
+          ? DateTime.parse(created)
+          : (created as Timestamp).toDate(),
+      updatedAt: updated is String
+          ? DateTime.parse(updated)
+          : (updated as Timestamp).toDate(),
     );
   }
 

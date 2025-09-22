@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import '../../domain/entities/institution.dart';
 
 /// Institution data model for JSON serialization
@@ -17,6 +18,8 @@ class InstitutionModel extends Institution {
 
   /// Create InstitutionModel from JSON
   factory InstitutionModel.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
+    final updated = json['updatedAt'];
     return InstitutionModel(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -26,8 +29,12 @@ class InstitutionModel extends Institution {
       email: json['email'] as String?,
       website: json['website'] as String?,
       logoUrl: json['logoUrl'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: created is String
+          ? DateTime.parse(created)
+          : (created as Timestamp).toDate(),
+      updatedAt: updated is String
+          ? DateTime.parse(updated)
+          : (updated as Timestamp).toDate(),
     );
   }
 

@@ -5,7 +5,7 @@ import '../bloc/auth_bloc.dart';
 import '../../../modules/auth/domain/entities/institution.dart';
 
 class LoginScreen extends StatefulWidget {
-  const LoginScreen({super.key,});
+  const LoginScreen({super.key});
 
   @override
   State<LoginScreen> createState() => _LoginScreenState();
@@ -24,7 +24,7 @@ class _LoginScreenState extends State<LoginScreen> {
         listener: (context, state) {
           state.maybeWhen(
             authenticated: (_) {
-              context.go('/dashboard');
+              context.go('/unified-dashboard');
             },
             error: (failure) {
               ScaffoldMessenger.of(
@@ -76,7 +76,6 @@ class _LoginScreenState extends State<LoginScreen> {
                         AuthEvent.loginRequested(
                           _emailController.text,
                           _passwordController.text,
-                         
                         ),
                       );
                     }

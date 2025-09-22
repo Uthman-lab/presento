@@ -80,7 +80,61 @@ Future<void> seedDummyData() async {
         .get();
 
     if (institutionDoc.exists) {
-      print('ℹ️  Dummy data already exists, skipping seed...');
+      print('ℹ️  Institution already exists, ensuring user documents...');
+
+      // Ensure all test users have Firestore documents
+      final testUsers = [
+        {
+          'email': 'admin@test.com',
+          'name': 'John Admin',
+          'role': 'admin',
+          'id': 'admin_001',
+        },
+        {
+          'email': 'supervisor@test.com',
+          'name': 'Sarah Supervisor',
+          'role': 'supervisor',
+          'id': 'supervisor_001',
+        },
+        {
+          'email': 'classrep@test.com',
+          'name': 'Mike ClassRep',
+          'role': 'class_rep',
+          'id': 'classrep_001',
+        },
+        {
+          'email': 'stakeholder@test.com',
+          'name': 'Emma Stakeholder',
+          'role': 'stakeholder',
+          'id': 'stakeholder_001',
+        },
+      ];
+
+      for (final userData in testUsers) {
+        final userDoc = await firestore
+            .collection('users')
+            .doc(userData['id'] as String)
+            .get();
+
+        if (!userDoc.exists) {
+          print('📝 Creating missing user document for ${userData['email']}');
+          await firestore
+              .collection('users')
+              .doc(userData['id'] as String)
+              .set({
+                'id': userData['id'],
+                'email': userData['email'],
+                'name': userData['name'],
+                'role': userData['role'],
+                'institutionId': institutionId,
+                'createdAt': FieldValue.serverTimestamp(),
+                'updatedAt': FieldValue.serverTimestamp(),
+              });
+        } else {
+          print('✅ User document exists for ${userData['email']}');
+        }
+      }
+
       print('🔑 Use these test credentials:');
       print('👤 Admin: admin@test.com / password123');
       print('👤 Supervisor: supervisor@test.com / password123');

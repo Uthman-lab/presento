@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import '../../domain/entities/class.dart';
 
 /// Class data model for JSON serialization
@@ -17,6 +18,8 @@ class ClassModel extends Class {
 
   /// Create ClassModel from JSON
   factory ClassModel.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
+    final updated = json['updatedAt'];
     return ClassModel(
       id: json['id'] as String,
       name: json['name'] as String,
@@ -25,9 +28,13 @@ class ClassModel extends Class {
       roomNumber: json['roomNumber'] as String?,
       schedule: json['schedule'] as String?,
       teacherName: json['teacherName'] as String?,
-      maxStudents: json['maxStudents'] as int,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      maxStudents: (json['maxStudents'] as num).toInt(),
+      createdAt: created is String
+          ? DateTime.parse(created)
+          : (created as Timestamp).toDate(),
+      updatedAt: updated is String
+          ? DateTime.parse(updated)
+          : (updated as Timestamp).toDate(),
     );
   }
 

@@ -1,3 +1,4 @@
+import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
 import '../../domain/entities/user.dart';
 
 /// User data model for JSON serialization
@@ -15,6 +16,8 @@ class UserModel extends User {
 
   /// Create UserModel from JSON
   factory UserModel.fromJson(Map<String, dynamic> json) {
+    final created = json['createdAt'];
+    final updated = json['updatedAt'];
     return UserModel(
       id: json['id'] as String,
       email: json['email'] as String,
@@ -22,8 +25,12 @@ class UserModel extends User {
       role: json['role'] as String,
       institutionId: json['institutionId'] as String,
       profilePictureUrl: json['profilePictureUrl'] as String?,
-      createdAt: DateTime.parse(json['createdAt'] as String),
-      updatedAt: DateTime.parse(json['updatedAt'] as String),
+      createdAt: created is Timestamp
+          ? created.toDate()
+          : DateTime.parse(created as String),
+      updatedAt: updated is Timestamp
+          ? updated.toDate()
+          : DateTime.parse(updated as String),
     );
   }
 

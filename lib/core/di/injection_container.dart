@@ -36,6 +36,7 @@ import '../../ui/attendance/bloc/attendance_bloc.dart';
 import '../../ui/attendance/bloc/attendance_report_bloc.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:cloud_functions/cloud_functions.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../modules/attendance/domain/usecases/get_attendance_by_date_range.dart';
 import '../../ui/attendance/bloc/attendance_view_bloc.dart';
@@ -59,6 +60,7 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => sharedPreferences);
   getIt.registerLazySingleton(() => FirebaseAuth.instance);
   getIt.registerLazySingleton(() => FirebaseFirestore.instance);
+  getIt.registerLazySingleton(() => FirebaseFunctions.instance);
 
   // Optimized Services for Performance & UX
   getIt.registerLazySingleton<SmartCacheManager>(
