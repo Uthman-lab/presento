@@ -41,6 +41,10 @@ import '../../modules/attendance/domain/usecases/get_attendance_by_date_range.da
 import '../../ui/attendance/bloc/attendance_view_bloc.dart';
 import '../../ui/dashboard/bloc/dashboard_bloc.dart';
 
+// Optimized services
+import '../services/smart_cache_manager.dart';
+import '../routing/smart_router_service.dart';
+
 final getIt = GetIt.instance;
 
 /// Initialize all dependencies for the application
@@ -55,6 +59,14 @@ Future<void> initDependencies() async {
   getIt.registerLazySingleton(() => sharedPreferences);
   getIt.registerLazySingleton(() => FirebaseAuth.instance);
   getIt.registerLazySingleton(() => FirebaseFirestore.instance);
+
+  // Optimized Services for Performance & UX
+  getIt.registerLazySingleton<SmartCacheManager>(
+    () => SmartCacheManager(getIt()),
+  );
+  getIt.registerLazySingleton<SmartRouterService>(
+    () => SmartRouterService(getIt()),
+  );
 
   // Features - Auth
   // Data sources
