@@ -1,136 +1,121 @@
-import 'package:firebase_auth/firebase_auth.dart' as firebase;
-import 'package:cloud_firestore/cloud_firestore.dart';
-import '../models/user_model.dart';
-import '../models/institution_model.dart';
+part of '../data.dart';
 
-/// Abstract interface for remote authentication data source
 abstract class AuthRemoteDataSource {
-  /// Login with email, password, and institution
-  Future<UserModel> login(String email, String password);
+  Future<UserModel> login({required String email, required String password});
 
-  /// Logout the current user
   Future<void> logout();
 
-  /// Get the currently authenticated user
-  Future<UserModel> getCurrentUser();
+  Future<UserModel?> getCurrentUser();
 
-  /// Get list of available institutions
-  Future<List<InstitutionModel>> getInstitutions();
-
-  /// Register a new user
-  Future<UserModel> register(
-    String email,
-    String password,
-    String name,
-    String institutionId,
-    String role,
-  );
+  Future<void> resetPassword({required String email});
 }
 
-/// Implementation of AuthRemoteDataSource using Firebase
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
-  final firebase.FirebaseAuth _auth;
-  final FirebaseFirestore _firestore;
+  final FirebaseAuth firebaseAuth;
+  final FirebaseFirestore firestore;
 
-  AuthRemoteDataSourceImpl({
-    required firebase.FirebaseAuth auth,
-    required FirebaseFirestore firestore,
-  }) : _auth = auth,
-       _firestore = firestore;
+  const AuthRemoteDataSourceImpl({
+    required this.firebaseAuth,
+    required this.firestore,
+  });
 
   @override
-  Future<UserModel> login(String email, String password) async {
+  Future<UserModel> login({
+    required String email,
+    required String password,
+  }) async {
     try {
-      final userCredential = await _auth.signInWithEmailAndPassword(
-        email: email.trim(),
-        password: password.trim(),
+      final credential = await firebaseAuth.signInWithEmailAndPassword(
+        email: email,
+        password: password,
       );
-      final user = userCredential.user;
-      if (user == null) {
-        throw Exception('User not found');
+
+      if (credential.user == null) {
+        throw const AuthException(message: 'Login failed');
       }
 
-      // Fetch profile from top-level 'users' collection by email
-      final snap = await _firestore
-          .collection('users')
-          .where('email', isEqualTo: email.trim())
-          .limit(1)
+      // Fetch user document from Firestore
+      final userDoc = await firestore
+          .collection(AppConstants.usersCollection)
+          .doc(credential.user!.email!)
           .get();
 
-      if (snap.docs.isEmpty) {
-        throw Exception('User profile not found');
+      if (!userDoc.exists) {
+        throw const AuthException(message: 'User profile not found');
       }
-      return UserModel.fromJson(snap.docs.first.data());
-    } catch (e) {
-      rethrow;
+
+      final userData = userDoc.data()!;
+      userData['id'] = credential.user!.uid;
+
+      return UserModel.fromJson(userData);
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthException(e);
+    } on FirebaseException catch (e) {
+      throw ServerException(message: 'Firebase error: ${e.message}');
     }
   }
 
   @override
   Future<void> logout() async {
-    await _auth.signOut();
+    try {
+      await firebaseAuth.signOut();
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthException(e);
+    }
   }
 
   @override
-  Future<UserModel> getCurrentUser() async {
-    final user = _auth.currentUser;
-    if (user == null) {
-      throw Exception('Not authenticated');
+  Future<UserModel?> getCurrentUser() async {
+    try {
+      final firebaseUser = firebaseAuth.currentUser;
+      if (firebaseUser == null) return null;
+
+      // Fetch user document from Firestore
+      final userDoc = await firestore
+          .collection(AppConstants.usersCollection)
+          .doc(firebaseUser.uid)
+          .get();
+
+      if (!userDoc.exists) return null;
+
+      final userData = userDoc.data()!;
+      userData['id'] = firebaseUser.uid;
+
+      return UserModel.fromJson(userData);
+    } on FirebaseException catch (e) {
+      throw ServerException(message: 'Firebase error: ${e.message}');
     }
-    // This is a simplification. In a real app, you'd get the institutionId from the user's claims or another source.
-    final querySnapshot = await _firestore
-        .collectionGroup('users')
-        .where('id', isEqualTo: user.uid)
-        .limit(1)
-        .get();
-    if (querySnapshot.docs.isEmpty) {
-      throw Exception('User data not found');
-    }
-    return UserModel.fromJson(querySnapshot.docs.first.data());
   }
 
   @override
-  Future<List<InstitutionModel>> getInstitutions() async {
-    final snapshot = await _firestore.collection('institutions').get();
-    return snapshot.docs
-        .map((doc) => InstitutionModel.fromJson(doc.data()))
-        .toList();
+  Future<void> resetPassword({required String email}) async {
+    try {
+      await firebaseAuth.sendPasswordResetEmail(email: email);
+    } on FirebaseAuthException catch (e) {
+      throw _handleFirebaseAuthException(e);
+    }
   }
 
-  @override
-  Future<UserModel> register(
-    String email,
-    String password,
-    String name,
-    String institutionId,
-    String role,
-  ) async {
-    final userCredential = await _auth.createUserWithEmailAndPassword(
-      email: email,
-      password: password,
-    );
-    final user = userCredential.user;
-    if (user == null) {
-      throw Exception('Failed to create user');
+  AuthException _handleFirebaseAuthException(FirebaseAuthException e) {
+    switch (e.code) {
+      case 'user-not-found':
+        return const AuthException(message: 'No user found with this email');
+      case 'wrong-password':
+        return const AuthException(message: 'Incorrect password');
+      case 'invalid-email':
+        return const AuthException(message: 'Invalid email address');
+      case 'user-disabled':
+        return const AuthException(message: 'This account has been disabled');
+      case 'too-many-requests':
+        return const AuthException(
+          message: 'Too many failed attempts. Please try again later',
+        );
+      case 'network-request-failed':
+        return const AuthException(
+          message: 'Network error. Please check your connection',
+        );
+      default:
+        return AuthException(message: 'Authentication failed: ${e.message}');
     }
-
-    final userModel = UserModel(
-      id: user.uid,
-      email: email,
-      name: name,
-      role: role,
-      institutionId: institutionId,
-      createdAt: DateTime.now(),
-      updatedAt: DateTime.now(),
-    );
-
-    await _firestore
-        .collection('institutions')
-        .doc(institutionId)
-        .collection('users')
-        .doc(user.uid)
-        .set(userModel.toJson());
-
-    return userModel;
   }
 }

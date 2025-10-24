@@ -1,14 +1,6 @@
-import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../../../../core/network/network_info.dart';
-import '../../domain/entities/user.dart';
-import '../../domain/entities/institution.dart';
-import '../../domain/repositories/auth_repository.dart';
-import '../datasources/auth_remote_data_source.dart';
-import '../datasources/auth_local_data_source.dart';
+part of '../data.dart';
 
-/// Implementation of AuthRepository
-class AuthRepositoryImpl implements AuthRepository {
+class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   final AuthRemoteDataSource remoteDataSource;
   final AuthLocalDataSource localDataSource;
   final NetworkInfo networkInfo;
@@ -20,133 +12,76 @@ class AuthRepositoryImpl implements AuthRepository {
   });
 
   @override
-  Future<Either<Failure, User>> login(
-    String email,
-    String password,
-  ) async {
-    if (await networkInfo.isConnected) {
-      try {
-        final remoteUser = await remoteDataSource.login(
-          email,
-          password,
-        );
-        localDataSource.cacheUser(remoteUser);
-        return Right(remoteUser.toDomain());
-      } catch (e) {
-        return Left(ServerFailure(e.toString()));
-      }
-    } else {
-      return Left(NetworkFailure());
+  Future<Either<Failure, User>> login({
+    required String email,
+    required String password,
+  }) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
     }
+
+    return executeWithErrorHandling(() async {
+      final userModel = await remoteDataSource.login(
+        email: email,
+        password: password,
+      );
+      await localDataSource.cacheUser(userModel);
+      return userModel;
+    });
   }
 
   @override
-  Future<Either<Failure, Unit>> logout() async {
-    try {
+  Future<Either<Failure, void>> logout() async {
+    return executeWithErrorHandling(() async {
       await remoteDataSource.logout();
-      await localDataSource.clearUser();
-      return Right(unit);
-    } catch (e) {
-      return Left(ServerFailure(e.toString()));
-    }
+      await localDataSource.clearCache();
+    });
   }
 
   @override
-  Future<Either<Failure, User>> getCurrentUser() async {
-    try {
-      final user = await localDataSource.getLastUser();
-      return Right(user.toDomain());
-    } catch (e) {
+  Future<Either<Failure, User?>> getCurrentUser() async {
+    return executeWithErrorHandling(() async {
+      // Check if session is valid first
+      final isSessionValid = await localDataSource.isSessionValid();
+      if (!isSessionValid) {
+        await localDataSource.clearCache();
+        return null;
+      }
+
+      // Try to get cached user first
+      final cachedUser = await localDataSource.getCachedUser();
+      if (cachedUser != null) {
+        return cachedUser;
+      }
+
+      // If no cached user, try to get from remote
       if (await networkInfo.isConnected) {
-        try {
-          final remoteUser = await remoteDataSource.getCurrentUser();
-          localDataSource.cacheUser(remoteUser);
-          return Right(remoteUser.toDomain());
-        } catch (e) {
-          return Left(ServerFailure(e.toString()));
+        final remoteUser = await remoteDataSource.getCurrentUser();
+        if (remoteUser != null) {
+          await localDataSource.cacheUser(remoteUser);
         }
-      } else {
-        return Left(AuthFailure('Not authenticated'));
+        return remoteUser;
       }
+
+      return null;
+    });
+  }
+
+  @override
+  Future<Either<Failure, void>> resetPassword({required String email}) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
     }
+
+    return executeWithErrorHandling(() async {
+      await remoteDataSource.resetPassword(email: email);
+    });
   }
 
   @override
-  Future<Either<Failure, bool>> isAuthenticated() async {
-    try {
-      await localDataSource.getLastUser();
-      return Right(true);
-    } catch (e) {
-      return Right(false);
-    }
-  }
-
-  @override
-  Future<Either<Failure, List<Institution>>> getInstitutions() async {
-    if (await networkInfo.isConnected) {
-      try {
-        final remoteInstitutions = await remoteDataSource.getInstitutions();
-        return Right(
-          remoteInstitutions.map((model) => model.toDomain()).toList(),
-        );
-      } catch (e) {
-        return Left(ServerFailure(e.toString()));
-      }
-    } else {
-      return Left(NetworkFailure());
-    }
-  }
-
-  @override
-  Future<Either<Failure, User>> register(
-    String email,
-    String password,
-    String name,
-    String institutionId,
-    String role,
-  ) async {
-    if (await networkInfo.isConnected) {
-      try {
-        final remoteUser = await remoteDataSource.register(
-          email,
-          password,
-          name,
-          institutionId,
-          role,
-        );
-        return Right(remoteUser.toDomain());
-      } catch (e) {
-        return Left(ServerFailure(e.toString()));
-      }
-    } else {
-      return Left(NetworkFailure());
-    }
-  }
-
-  @override
-  Future<Either<Failure, User>> updateProfile(User user) {
-    // TODO: implement updateProfile
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, Unit>> changePassword(
-    String currentPassword,
-    String newPassword,
-  ) {
-    // TODO: implement changePassword
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, Unit>> resetPassword(String email) {
-    // TODO: implement resetPassword
-    throw UnimplementedError();
-  }
-
-  @override
-  Future<Either<Failure, Unit>> refreshToken() {
-    // TODO: implement refreshToken
-    throw UnimplementedError();
+  Future<Either<Failure, bool>> isSessionValid() async {
+    return executeWithErrorHandling(() async {
+      return await localDataSource.isSessionValid();
+    });
   }
 }

@@ -1,20 +1,24 @@
-import 'package:dartz/dartz.dart';
-import '../../../../core/error/failures.dart';
-import '../entities/user.dart';
-import '../repositories/auth_repository.dart';
+part of '../domain.dart';
 
-/// Use case for user login
-class Login {
+class LoginUseCase {
   final AuthRepository repository;
 
-  Login(this.repository);
+  LoginUseCase({required this.repository});
 
-  /// Execute login with email, password, and institution
-  Future<Either<Failure, User>> call(
-    String email,
-    String password,
-   
-  ) async {
-    return await repository.login(email, password);
+  Future<Either<Failure, User>> call(LoginParams params) async {
+    return await repository.login(
+      email: params.email,
+      password: params.password,
+    );
   }
+}
+
+class LoginParams extends Equatable {
+  final String email;
+  final String password;
+
+  const LoginParams({required this.email, required this.password});
+
+  @override
+  List<Object> get props => [email, password];
 }

@@ -1,78 +1,57 @@
-import 'package:cloud_firestore/cloud_firestore.dart' show Timestamp;
-import '../../domain/entities/user.dart';
+part of '../data.dart';
 
-/// User data model for JSON serialization
 class UserModel extends User {
   const UserModel({
     required super.id,
     required super.email,
     required super.name,
-    required super.role,
-    required super.institutionId,
-    super.profilePictureUrl,
+    required super.roles,
     required super.createdAt,
     required super.updatedAt,
   });
 
-  /// Create UserModel from JSON
   factory UserModel.fromJson(Map<String, dynamic> json) {
-    final created = json['createdAt'];
-    final updated = json['updatedAt'];
+    final rolesMap = <String, InstitutionRoleModel>{};
+    final rolesJson = json['roles'] as Map<String, dynamic>? ?? {};
+
+    for (final entry in rolesJson.entries) {
+      rolesMap[entry.key] = InstitutionRoleModel.fromJson(entry.value);
+    }
+
     return UserModel(
       id: json['id'] as String,
       email: json['email'] as String,
       name: json['name'] as String,
-      role: json['role'] as String,
-      institutionId: json['institutionId'] as String,
-      profilePictureUrl: json['profilePictureUrl'] as String?,
-      createdAt: created is Timestamp
-          ? created.toDate()
-          : DateTime.parse(created as String),
-      updatedAt: updated is Timestamp
-          ? updated.toDate()
-          : DateTime.parse(updated as String),
+      roles: rolesMap,
+      createdAt: (json['createdAt'] as Timestamp).toDateTime(),
+      updatedAt: (json['updatedAt'] as Timestamp).toDateTime(),
     );
   }
 
-  /// Convert UserModel to JSON
+  factory UserModel.fromFirebaseUser(firebase_auth.User firebaseUser) {
+    return UserModel(
+      id: firebaseUser.uid,
+      email: firebaseUser.email ?? '',
+      name: firebaseUser.displayName ?? '',
+      roles: const {},
+      createdAt: DateTime.now(),
+      updatedAt: DateTime.now(),
+    );
+  }
+
   Map<String, dynamic> toJson() {
+    final rolesJson = <String, dynamic>{};
+    for (final entry in roles.entries) {
+      rolesJson[entry.key] = (entry.value as InstitutionRoleModel).toJson();
+    }
+
     return {
-      'id': id,
+      'id': id.toString(),
       'email': email,
       'name': name,
-      'role': role,
-      'institutionId': institutionId,
-      'profilePictureUrl': profilePictureUrl,
+      'roles': rolesJson,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };
-  }
-
-  /// Convert to domain entity
-  User toDomain() {
-    return User(
-      id: id,
-      email: email,
-      name: name,
-      role: role,
-      institutionId: institutionId,
-      profilePictureUrl: profilePictureUrl,
-      createdAt: createdAt,
-      updatedAt: updatedAt,
-    );
-  }
-
-  /// Create from domain entity
-  factory UserModel.fromDomain(User user) {
-    return UserModel(
-      id: user.id,
-      email: user.email,
-      name: user.name,
-      role: user.role,
-      institutionId: user.institutionId,
-      profilePictureUrl: user.profilePictureUrl,
-      createdAt: user.createdAt,
-      updatedAt: user.updatedAt,
-    );
   }
 }

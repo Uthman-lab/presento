@@ -1,48 +1,59 @@
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../models/user_model.dart';
+part of '../data.dart';
 
-const cachedUser = 'CACHED_USER';
-
-/// Abstract interface for local authentication data source
 abstract class AuthLocalDataSource {
-  /// Caches the user model
-  Future<void> cacheUser(UserModel userToCache);
-
-  /// Gets the cached user model
-  Future<UserModel> getLastUser();
-
-  /// Clears the cached user
-  Future<void> clearUser();
+  Future<void> cacheUser(UserModel user);
+  Future<UserModel?> getCachedUser();
+  Future<void> clearCache();
+  Future<bool> isSessionValid();
+  Future<void> cacheLastLogin();
 }
 
-/// Implementation of AuthLocalDataSource using SharedPreferences
 class AuthLocalDataSourceImpl implements AuthLocalDataSource {
-  final SharedPreferences _sharedPreferences;
+  final SharedPreferences sharedPreferences;
 
-  AuthLocalDataSourceImpl({required SharedPreferences sharedPreferences})
-    : _sharedPreferences = sharedPreferences;
+  const AuthLocalDataSourceImpl({required this.sharedPreferences});
 
   @override
-  Future<void> cacheUser(UserModel userToCache) {
-    return _sharedPreferences.setString(
-      cachedUser,
-      json.encode(userToCache.toJson()),
-    );
+  Future<void> cacheUser(UserModel user) async {
+    final userJson = json.encode(user.toJson());
+    await sharedPreferences.setString(AppConstants.userDataKey, userJson);
+    await cacheLastLogin();
   }
 
   @override
-  Future<UserModel> getLastUser() {
-    final jsonString = _sharedPreferences.getString(cachedUser);
-    if (jsonString != null) {
-      return Future.value(UserModel.fromJson(json.decode(jsonString)));
-    } else {
-      throw Exception('No cached user');
+  Future<UserModel?> getCachedUser() async {
+    final userJson = sharedPreferences.getString(AppConstants.userDataKey);
+    if (userJson == null) return null;
+
+    final userMap = json.decode(userJson) as Map<String, dynamic>;
+    return UserModel.fromJson(userMap);
+  }
+
+  @override
+  Future<void> clearCache() async {
+    await sharedPreferences.remove(AppConstants.userDataKey);
+    await sharedPreferences.remove(AppConstants.lastLoginKey);
+    await sharedPreferences.remove(AppConstants.currentInstitutionKey);
+  }
+
+  @override
+  Future<bool> isSessionValid() async {
+    try {
+      final lastLoginString = sharedPreferences.getString(
+        AppConstants.lastLoginKey,
+      );
+      if (lastLoginString == null) return false;
+
+      final lastLogin = DateTime.parse(lastLoginString);
+      return !lastLogin.isSessionExpired;
+    } catch (e) {
+      return false;
     }
   }
 
   @override
-  Future<void> clearUser() {
-    return _sharedPreferences.remove(cachedUser);
+  Future<void> cacheLastLogin() async {
+    final now = DateTime.now().toIso8601String();
+    await sharedPreferences.setString(AppConstants.lastLoginKey, now);
   }
 }
