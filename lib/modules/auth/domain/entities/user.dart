@@ -5,6 +5,7 @@ class User extends Equatable {
   final String email;
   final String name;
   final Map<String, InstitutionRole> roles;
+  final String? currentInstitutionId;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -13,6 +14,7 @@ class User extends Equatable {
     required this.email,
     required this.name,
     required this.roles,
+    this.currentInstitutionId,
     required this.createdAt,
     required this.updatedAt,
   });
@@ -30,6 +32,23 @@ class User extends Equatable {
     return roles[institutionId];
   }
 
+  bool get hasMultipleInstitutions {
+    return activeInstitutionIds.length > 1;
+  }
+
+  String? get currentRole {
+    if (currentInstitutionId == null) return null;
+    return roles[currentInstitutionId]?.role;
+  }
+
   @override
-  List<Object> get props => [uid, email, name, roles, createdAt, updatedAt];
+  List<Object?> get props => [
+    uid,
+    email,
+    name,
+    roles,
+    currentInstitutionId,
+    createdAt,
+    updatedAt,
+  ];
 }

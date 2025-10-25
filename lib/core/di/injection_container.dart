@@ -40,6 +40,8 @@ Future<void> init() async {
   sl.registerLazySingleton(() => LogoutUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetCurrentUserUseCase(repository: sl()));
   sl.registerLazySingleton(() => ResetPasswordUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetInstitutionsUseCase(repository: sl()));
+  sl.registerLazySingleton(() => SelectInstitutionUseCase(repository: sl()));
 
   // BLoC
   sl.registerFactory(
@@ -48,6 +50,8 @@ Future<void> init() async {
       logoutUseCase: sl(),
       getCurrentUserUseCase: sl(),
       resetPasswordUseCase: sl(),
+      getInstitutionsUseCase: sl(),
+      selectInstitutionUseCase: sl(),
     ),
   );
 }

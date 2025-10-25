@@ -32,18 +32,3 @@ extension StringExtensions on String {
   }
 }
 
-extension DynamicDateTimeExtension on dynamic {
-  /// Parses a datetime value from Firestore or JSON
-  /// Handles both Firestore Timestamp objects and ISO 8601 strings
-  DateTime toDateTime() {
-    if (this is Timestamp) {
-      return (this as Timestamp).toDate();
-    } else if (this is String) {
-      return DateTime.parse(this as String);
-    } else if (this is DateTime) {
-      return this as DateTime;
-    } else {
-      throw FormatException('Invalid datetime format: $this');
-    }
-  }
-}

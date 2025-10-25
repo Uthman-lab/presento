@@ -84,4 +84,46 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
       return await localDataSource.isSessionValid();
     });
   }
+
+  @override
+  Future<Either<Failure, List<Institution>>> getInstitutions(
+    List<String> institutionIds,
+  ) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+
+    return executeWithErrorHandling(() async {
+      return await remoteDataSource.getInstitutions(institutionIds);
+    });
+  }
+
+  @override
+  Future<Either<Failure, void>> selectInstitution(
+    String userId,
+    String institutionId,
+  ) async {
+    if (!await networkInfo.isConnected) {
+      return const Left(NetworkFailure(message: 'No internet connection'));
+    }
+
+    return executeWithErrorHandling(() async {
+      await remoteDataSource.selectInstitution(userId, institutionId);
+
+      // Update cached user with new currentInstitutionId
+      final cachedUser = await localDataSource.getCachedUser();
+      if (cachedUser != null) {
+        final updatedUser = UserModel(
+          uid: cachedUser.uid,
+          email: cachedUser.email,
+          name: cachedUser.name,
+          roles: cachedUser.roles,
+          currentInstitutionId: institutionId,
+          createdAt: cachedUser.createdAt,
+          updatedAt: DateTime.now(),
+        );
+        await localDataSource.cacheUser(updatedUser);
+      }
+    });
+  }
 }

@@ -45,3 +45,21 @@ class PasswordResetSent extends AuthState {
   @override
   List<Object> get props => [email];
 }
+
+class InstitutionsLoaded extends AuthState {
+  final List<Institution> institutions;
+
+  const InstitutionsLoaded({required this.institutions});
+
+  @override
+  List<Object> get props => [institutions];
+}
+
+class InstitutionSelected extends AuthState {
+  final User user;
+
+  const InstitutionSelected({required this.user});
+
+  @override
+  List<Object> get props => [user];
+}

@@ -93,7 +93,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 BlocConsumer<AuthBloc, AuthState>(
                   listener: (context, state) {
                     if (state is Authenticated) {
-                      context.go(AppRouter.userDetailsRoute);
+                      context.go(AppRouter.dashboardRoute);
                     } else if (state is AuthError) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(

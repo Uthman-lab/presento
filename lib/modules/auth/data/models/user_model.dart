@@ -6,6 +6,7 @@ class UserModel extends User {
     required super.email,
     required super.name,
     required super.roles,
+    super.currentInstitutionId,
     required super.createdAt,
     required super.updatedAt,
   });
@@ -23,6 +24,7 @@ class UserModel extends User {
       email: json['email'] as String,
       name: json['name'] as String,
       roles: rolesMap,
+      currentInstitutionId: json['currentInstitutionId'] as String?,
       createdAt: parseDateTime(json['createdAt']),
       updatedAt: parseDateTime(json['updatedAt']),
     );
@@ -50,6 +52,7 @@ class UserModel extends User {
       'email': email,
       'name': name,
       'roles': rolesJson,
+      'currentInstitutionId': currentInstitutionId,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };

@@ -5,17 +5,23 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LogoutUseCase logoutUseCase;
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final ResetPasswordUseCase resetPasswordUseCase;
+  final GetInstitutionsUseCase getInstitutionsUseCase;
+  final SelectInstitutionUseCase selectInstitutionUseCase;
 
   AuthBloc({
     required this.loginUseCase,
     required this.logoutUseCase,
     required this.getCurrentUserUseCase,
     required this.resetPasswordUseCase,
+    required this.getInstitutionsUseCase,
+    required this.selectInstitutionUseCase,
   }) : super(const AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
     on<LogoutRequested>(_onLogoutRequested);
     on<CheckAuthStatus>(_onCheckAuthStatus);
     on<ResetPasswordRequested>(_onResetPasswordRequested);
+    on<InstitutionsLoadRequested>(_onInstitutionsLoadRequested);
+    on<InstitutionSelectionRequested>(_onInstitutionSelectionRequested);
   }
 
   Future<void> _onLoginRequested(
@@ -78,6 +84,83 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     result.fold(
       (failure) => emit(AuthError(message: failure.message)),
       (_) => emit(PasswordResetSent(email: event.email)),
+    );
+  }
+
+  Future<void> _onInstitutionsLoadRequested(
+    InstitutionsLoadRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    // Get current user to extract institution IDs
+    final currentUserResult = await getCurrentUserUseCase();
+
+    currentUserResult.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (user) async {
+        if (user == null) {
+          emit(const Unauthenticated());
+          return;
+        }
+
+        final institutionIds = user.activeInstitutionIds;
+        if (institutionIds.isEmpty) {
+          emit(const AuthError(message: 'No institutions found'));
+          return;
+        }
+
+        final result = await getInstitutionsUseCase(
+          institutionIds: institutionIds,
+        );
+
+        result.fold(
+          (failure) => emit(AuthError(message: failure.message)),
+          (institutions) =>
+              emit(InstitutionsLoaded(institutions: institutions)),
+        );
+      },
+    );
+  }
+
+  Future<void> _onInstitutionSelectionRequested(
+    InstitutionSelectionRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    // Get current user
+    final currentUserResult = await getCurrentUserUseCase();
+
+    currentUserResult.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (user) async {
+        if (user == null) {
+          emit(const Unauthenticated());
+          return;
+        }
+
+        final result = await selectInstitutionUseCase(
+          userId: user.uid,
+          institutionId: event.institutionId,
+        );
+
+        result.fold((failure) => emit(AuthError(message: failure.message)), (
+          _,
+        ) {
+          // Create updated user with selected institution
+          final updatedUser = User(
+            uid: user.uid,
+            email: user.email,
+            name: user.name,
+            roles: user.roles,
+            currentInstitutionId: event.institutionId,
+            createdAt: user.createdAt,
+            updatedAt: DateTime.now(),
+          );
+          emit(InstitutionSelected(user: updatedUser));
+        });
+      },
     );
   }
 }

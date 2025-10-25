@@ -13,4 +13,13 @@ abstract class AuthRepository {
   Future<Either<Failure, void>> resetPassword({required String email});
 
   Future<Either<Failure, bool>> isSessionValid();
+
+  Future<Either<Failure, List<Institution>>> getInstitutions(
+    List<String> institutionIds,
+  );
+
+  Future<Either<Failure, void>> selectInstitution(
+    String userId,
+    String institutionId,
+  );
 }

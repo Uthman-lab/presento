@@ -8,6 +8,10 @@ abstract class AuthRemoteDataSource {
   Future<UserModel?> getCurrentUser();
 
   Future<void> resetPassword({required String email});
+
+  Future<List<InstitutionModel>> getInstitutions(List<String> institutionIds);
+
+  Future<void> selectInstitution(String userId, String institutionId);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -93,6 +97,47 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       await firebaseAuth.sendPasswordResetEmail(email: email);
     } on FirebaseAuthException catch (e) {
       throw _handleFirebaseAuthException(e);
+    }
+  }
+
+  @override
+  Future<List<InstitutionModel>> getInstitutions(
+    List<String> institutionIds,
+  ) async {
+    try {
+      final institutions = <InstitutionModel>[];
+
+      for (final institutionId in institutionIds) {
+        final institutionDoc = await firestore
+            .collection(AppConstants.institutionsCollection)
+            .doc(institutionId)
+            .get();
+
+        if (institutionDoc.exists) {
+          final institutionData = institutionDoc.data()!;
+          institutionData['id'] = institutionId;
+          institutions.add(InstitutionModel.fromJson(institutionData));
+        }
+      }
+
+      return institutions;
+    } on FirebaseException catch (e) {
+      throw ServerException(message: 'Firebase error: ${e.message}');
+    }
+  }
+
+  @override
+  Future<void> selectInstitution(String userId, String institutionId) async {
+    try {
+      await firestore
+          .collection(AppConstants.usersCollection)
+          .doc(userId)
+          .update({
+            'currentInstitutionId': institutionId,
+            'updatedAt': FieldValue.serverTimestamp(),
+          });
+    } on FirebaseException catch (e) {
+      throw ServerException(message: 'Firebase error: ${e.message}');
     }
   }
 

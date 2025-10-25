@@ -26,4 +26,5 @@ export 'package:equatable/equatable.dart';
 
 // Additional imports
 export 'dart:convert';
+export 'dart:math';
 export 'package:intl/intl.dart' hide TextDirection;

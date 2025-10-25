@@ -33,3 +33,16 @@ class ResetPasswordRequested extends AuthEvent {
   @override
   List<Object> get props => [email];
 }
+
+class InstitutionsLoadRequested extends AuthEvent {
+  const InstitutionsLoadRequested();
+}
+
+class InstitutionSelectionRequested extends AuthEvent {
+  final String institutionId;
+
+  const InstitutionSelectionRequested({required this.institutionId});
+
+  @override
+  List<Object> get props => [institutionId];
+}
