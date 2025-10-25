@@ -1,8 +1,9 @@
 library auth_data;
 
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:task_master_tot/imports.dart';
-import 'package:task_master_tot/core/core.dart';
+import 'package:presento/imports.dart';
+import 'package:presento/core/core.dart';
+import '../../../core/utils/helper_functions.dart';
 import '../domain/domain.dart';
 
 part 'datasources/auth_local_data_source.dart';

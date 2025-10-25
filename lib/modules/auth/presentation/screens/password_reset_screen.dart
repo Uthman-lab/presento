@@ -24,7 +24,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
         title: const Text('Reset Password'),
         leading: IconButton(
           icon: const Icon(Icons.arrow_back),
-          onPressed: () => Navigator.of(context).pop(),
+          onPressed: () => context.pop(),
         ),
       ),
       body: SafeArea(
@@ -84,7 +84,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
                           backgroundColor: Colors.green,
                         ),
                       );
-                      Navigator.of(context).pop();
+                      context.pop();
                     } else if (state is AuthError) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(
@@ -106,7 +106,7 @@ class _PasswordResetScreenState extends State<PasswordResetScreen> {
 
                 // Back to Login
                 TextButton(
-                  onPressed: () => Navigator.of(context).pop(),
+                  onPressed: () => context.pop(),
                   child: const Text('Back to Login'),
                 ),
               ],

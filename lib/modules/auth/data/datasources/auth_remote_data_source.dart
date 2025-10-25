@@ -45,7 +45,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       final userData = userDoc.data()!;
-      userData['id'] = credential.user!.uid;
+      userData['uid'] = credential.user!.uid;
 
       return UserModel.fromJson(userData);
     } on FirebaseAuthException catch (e) {
@@ -79,7 +79,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       if (!userDoc.exists) return null;
 
       final userData = userDoc.data()!;
-      userData['id'] = firebaseUser.uid;
+      userData['uid'] = firebaseUser.uid;
 
       return UserModel.fromJson(userData);
     } on FirebaseException catch (e) {

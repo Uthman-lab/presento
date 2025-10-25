@@ -1,5 +1,5 @@
-import 'package:task_master_tot/core/di/injection_container.dart';
-import 'package:task_master_tot/imports.dart';
+import 'package:presento/core/di/injection_container.dart';
+import 'package:presento/imports.dart';
 import 'core/core.dart';
 import 'modules/auth/auth.dart';
 
@@ -27,7 +27,7 @@ class MyApp extends StatelessWidget {
         ),
       ],
       child: MaterialApp.router(
-        title: 'Task Master',
+        title: 'Presento',
         theme: ThemeData(
           primarySwatch: Colors.blue,
           useMaterial3: true,

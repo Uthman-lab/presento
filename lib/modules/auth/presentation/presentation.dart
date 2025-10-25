@@ -1,7 +1,7 @@
 library auth_presentation;
 
-import 'package:task_master_tot/imports.dart';
-import 'package:task_master_tot/core/core.dart';
+import 'package:presento/imports.dart';
+import 'package:presento/core/core.dart';
 import '../domain/domain.dart';
 
 part 'bloc/auth_bloc.dart';

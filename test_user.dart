@@ -1,4 +1,4 @@
-import 'package:task_master_tot/modules/auth/domain/domain.dart';
+import 'package:presento/modules/auth/domain/domain.dart';
 
 void main() {
   // Test if User class is accessible

@@ -1,6 +1,6 @@
-import 'package:task_master_tot/imports.dart';
-import 'package:task_master_tot/core/core.dart';
-import 'package:task_master_tot/modules/auth/auth.dart';
+import 'package:presento/imports.dart';
+import 'package:presento/core/core.dart';
+import 'package:presento/modules/auth/auth.dart';
 
 final sl = GetIt.instance;
 

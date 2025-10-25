@@ -2,7 +2,7 @@ part of '../data.dart';
 
 class UserModel extends User {
   const UserModel({
-    required super.id,
+    required super.uid,
     required super.email,
     required super.name,
     required super.roles,
@@ -19,18 +19,18 @@ class UserModel extends User {
     }
 
     return UserModel(
-      id: json['id'] as String,
+      uid: json['uid'] as String,
       email: json['email'] as String,
       name: json['name'] as String,
       roles: rolesMap,
-      createdAt: (json['createdAt'] as Timestamp).toDateTime(),
-      updatedAt: (json['updatedAt'] as Timestamp).toDateTime(),
+      createdAt: parseDateTime(json['createdAt']),
+      updatedAt: parseDateTime(json['updatedAt']),
     );
   }
 
   factory UserModel.fromFirebaseUser(firebase_auth.User firebaseUser) {
     return UserModel(
-      id: firebaseUser.uid,
+      uid: firebaseUser.uid,
       email: firebaseUser.email ?? '',
       name: firebaseUser.displayName ?? '',
       roles: const {},
@@ -46,7 +46,7 @@ class UserModel extends User {
     }
 
     return {
-      'id': id.toString(),
+      'uid': uid,
       'email': email,
       'name': name,
       'roles': rolesJson,

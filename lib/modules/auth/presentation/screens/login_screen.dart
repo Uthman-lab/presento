@@ -40,7 +40,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 ),
                 const SizedBox(height: 24),
                 Text(
-                  'Task Master',
+                  'Presento',
                   style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                     fontWeight: FontWeight.bold,
                     color: Theme.of(context).primaryColor,
@@ -116,9 +116,7 @@ class _LoginScreenState extends State<LoginScreen> {
                 // Forgot Password Link
                 TextButton(
                   onPressed: () {
-                    Navigator.of(
-                      context,
-                    ).pushNamed(AppRouter.passwordResetRoute);
+                    context.push(AppRouter.passwordResetRoute);
                   },
                   child: const Text('Forgot Password?'),
                 ),

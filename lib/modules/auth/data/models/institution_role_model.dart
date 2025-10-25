@@ -13,7 +13,7 @@ class InstitutionRoleModel extends InstitutionRole {
       role: json['role'] as String,
       assignedClassId: json['assignedClassId'] as String?,
       isActive: json['isActive'] as bool,
-      joinedAt: (json['joinedAt'] as Timestamp).toDateTime(),
+      joinedAt: parseDateTime(json['joinedAt']),
     );
   }
 

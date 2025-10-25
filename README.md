@@ -1,6 +1,6 @@
-# task_master_tot
+# Presento
 
-A new Flutter project.
+A Flutter attendance management system for madrasas with Clean Architecture and Firebase backend.
 
 ## Getting Started
 

@@ -50,7 +50,7 @@ class UserDetailsScreen extends StatelessWidget {
                           ),
                         ),
                         const SizedBox(height: 16),
-                        _buildInfoRow('ID', user.id),
+                        _buildInfoRow('ID', user.uid),
                         _buildInfoRow('Name', user.name),
                         _buildInfoRow('Email', user.email),
                         _buildInfoRow(

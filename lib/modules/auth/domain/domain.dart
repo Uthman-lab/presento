@@ -1,5 +1,5 @@
-import 'package:task_master_tot/imports.dart';
-import 'package:task_master_tot/core/core.dart';
+import 'package:presento/imports.dart';
+import 'package:presento/core/core.dart';
 
 part 'entities/institution_role.dart';
 part 'entities/user.dart';
