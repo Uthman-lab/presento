@@ -1,5 +1,5 @@
 import 'package:presento/imports.dart';
-import 'package:presento/modules/auth/presentation/presentation.dart';
+import 'package:presento/ui/auth/auth.ui.dart';
 import 'dashboard_screen.dart';
 import 'super_admin_dashboard.dart';
 import 'institution_admin_dashboard.dart';

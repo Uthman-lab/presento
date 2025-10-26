@@ -16,10 +16,6 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
     required String email,
     required String password,
   }) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(message: 'No internet connection'));
-    }
-
     return executeWithErrorHandling(() async {
       final userModel = await remoteDataSource.login(
         email: email,
@@ -27,7 +23,7 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
       );
       await localDataSource.cacheUser(userModel);
       return userModel;
-    });
+    }, networkInfo: networkInfo);
   }
 
   @override
@@ -69,13 +65,9 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
 
   @override
   Future<Either<Failure, void>> resetPassword({required String email}) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(message: 'No internet connection'));
-    }
-
     return executeWithErrorHandling(() async {
       await remoteDataSource.resetPassword(email: email);
-    });
+    }, networkInfo: networkInfo);
   }
 
   @override
@@ -89,26 +81,18 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   Future<Either<Failure, List<Institution>>> getInstitutions(
     List<String> institutionIds,
   ) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(message: 'No internet connection'));
-    }
-
     return executeWithErrorHandling(() async {
       return await remoteDataSource.getInstitutions(institutionIds);
-    });
+    }, networkInfo: networkInfo);
   }
 
   @override
   Future<Either<Failure, void>> selectInstitution(
-    String userId,
+    String userEmail,
     String institutionId,
   ) async {
-    if (!await networkInfo.isConnected) {
-      return const Left(NetworkFailure(message: 'No internet connection'));
-    }
-
     return executeWithErrorHandling(() async {
-      await remoteDataSource.selectInstitution(userId, institutionId);
+      await remoteDataSource.selectInstitution(userEmail, institutionId);
 
       // Update cached user with new currentInstitutionId
       final cachedUser = await localDataSource.getCachedUser();
@@ -124,6 +108,6 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
         );
         await localDataSource.cacheUser(updatedUser);
       }
-    });
+    }, networkInfo: networkInfo);
   }
 }

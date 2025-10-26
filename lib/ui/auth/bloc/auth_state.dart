@@ -1,4 +1,4 @@
-part of '../presentation.dart';
+part of '../auth.ui.dart';
 
 abstract class AuthState extends Equatable {
   const AuthState();
@@ -47,12 +47,13 @@ class PasswordResetSent extends AuthState {
 }
 
 class InstitutionsLoaded extends AuthState {
+  final User user;
   final List<Institution> institutions;
 
-  const InstitutionsLoaded({required this.institutions});
+  const InstitutionsLoaded({required this.user, required this.institutions});
 
   @override
-  List<Object> get props => [institutions];
+  List<Object> get props => [user, institutions];
 }
 
 class InstitutionSelected extends AuthState {

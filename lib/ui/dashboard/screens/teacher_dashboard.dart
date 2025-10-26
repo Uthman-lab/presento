@@ -1,14 +1,14 @@
 import 'package:presento/imports.dart';
-import 'package:presento/modules/auth/presentation/presentation.dart';
+import 'package:presento/ui/auth/auth.ui.dart';
 
-class ClassRepresentativeDashboard extends StatelessWidget {
-  const ClassRepresentativeDashboard({super.key});
+class TeacherDashboard extends StatelessWidget {
+  const TeacherDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Class Representative Dashboard'),
+        title: const Text('Teacher Dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -22,15 +22,15 @@ class ClassRepresentativeDashboard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.people, size: 64, color: Colors.purple),
+            Icon(Icons.person, size: 64, color: Colors.green),
             SizedBox(height: 16),
             Text(
-              'Class Representative Dashboard',
+              'Teacher Dashboard',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
             Text(
-              'Assist with attendance for your assigned class',
+              'Class management and attendance tracking',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             SizedBox(height: 24),
@@ -39,10 +39,11 @@ class ClassRepresentativeDashboard extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 16),
-            Text('• Mark Attendance for Assigned Class'),
-            Text('• View Class Attendance'),
-            Text('• View Class Roster'),
-            Text('• Generate Class Reports'),
+            Text('• Mark Attendance'),
+            Text('• View Class Rosters'),
+            Text('• Generate Reports'),
+            Text('• View Attendance History'),
+            Text('• Manage Students'),
           ],
         ),
       ),

@@ -1,14 +1,14 @@
 import 'package:presento/imports.dart';
-import 'package:presento/modules/auth/presentation/presentation.dart';
+import 'package:presento/ui/auth/auth.ui.dart';
 
-class TeacherDashboard extends StatelessWidget {
-  const TeacherDashboard({super.key});
+class InstitutionAdminDashboard extends StatelessWidget {
+  const InstitutionAdminDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Teacher Dashboard'),
+        title: const Text('Institution Admin Dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -22,15 +22,15 @@ class TeacherDashboard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.person, size: 64, color: Colors.green),
+            Icon(Icons.school, size: 64, color: Colors.blue),
             SizedBox(height: 16),
             Text(
-              'Teacher Dashboard',
+              'Institution Admin Dashboard',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
             Text(
-              'Class management and attendance tracking',
+              'Institution management and oversight',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             SizedBox(height: 24),
@@ -39,11 +39,11 @@ class TeacherDashboard extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 16),
-            Text('• Mark Attendance'),
-            Text('• View Class Rosters'),
-            Text('• Generate Reports'),
-            Text('• View Attendance History'),
-            Text('• Manage Students'),
+            Text('• Manage Institution Users'),
+            Text('• Create and Manage Classes'),
+            Text('• Student Management'),
+            Text('• Attendance Reports'),
+            Text('• Institution Analytics'),
           ],
         ),
       ),

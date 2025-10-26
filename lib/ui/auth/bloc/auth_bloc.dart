@@ -1,4 +1,4 @@
-part of '../presentation.dart';
+part of '../auth.ui.dart';
 
 class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final LoginUseCase loginUseCase;
@@ -96,30 +96,32 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     // Get current user to extract institution IDs
     final currentUserResult = await getCurrentUserUseCase();
 
-    currentUserResult.fold(
+    if (currentUserResult.isLeft()) {
+      emit(
+        AuthError(message: currentUserResult.fold((l) => l.message, (r) => '')),
+      );
+      return;
+    }
+
+    final user = currentUserResult.fold((l) => null, (r) => r);
+    if (user == null) {
+      emit(const Unauthenticated());
+      return;
+    }
+
+    final institutionIds = user.activeInstitutionIds;
+    if (institutionIds.isEmpty) {
+      emit(const AuthError(message: 'No institutions found'));
+      return;
+    }
+
+    // Await the institutions loading
+    final result = await getInstitutionsUseCase(institutionIds: institutionIds);
+
+    result.fold(
       (failure) => emit(AuthError(message: failure.message)),
-      (user) async {
-        if (user == null) {
-          emit(const Unauthenticated());
-          return;
-        }
-
-        final institutionIds = user.activeInstitutionIds;
-        if (institutionIds.isEmpty) {
-          emit(const AuthError(message: 'No institutions found'));
-          return;
-        }
-
-        final result = await getInstitutionsUseCase(
-          institutionIds: institutionIds,
-        );
-
-        result.fold(
-          (failure) => emit(AuthError(message: failure.message)),
-          (institutions) =>
-              emit(InstitutionsLoaded(institutions: institutions)),
-        );
-      },
+      (institutions) =>
+          emit(InstitutionsLoaded(user: user, institutions: institutions)),
     );
   }
 
@@ -129,38 +131,40 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   ) async {
     emit(const AuthLoading());
 
-    // Get current user
+    // Get current user first
     final currentUserResult = await getCurrentUserUseCase();
 
-    currentUserResult.fold(
-      (failure) => emit(AuthError(message: failure.message)),
-      (user) async {
-        if (user == null) {
-          emit(const Unauthenticated());
-          return;
-        }
+    if (currentUserResult.isLeft()) {
+      emit(
+        AuthError(message: currentUserResult.fold((l) => l.message, (r) => '')),
+      );
+      return;
+    }
 
-        final result = await selectInstitutionUseCase(
-          userId: user.uid,
-          institutionId: event.institutionId,
-        );
+    final user = currentUserResult.fold((l) => null, (r) => r);
+    if (user == null) {
+      emit(const Unauthenticated());
+      return;
+    }
 
-        result.fold((failure) => emit(AuthError(message: failure.message)), (
-          _,
-        ) {
-          // Create updated user with selected institution
-          final updatedUser = User(
-            uid: user.uid,
-            email: user.email,
-            name: user.name,
-            roles: user.roles,
-            currentInstitutionId: event.institutionId,
-            createdAt: user.createdAt,
-            updatedAt: DateTime.now(),
-          );
-          emit(InstitutionSelected(user: updatedUser));
-        });
-      },
+    // Await the institution selection
+    final result = await selectInstitutionUseCase(
+      userEmail: user.email,
+      institutionId: event.institutionId,
     );
+
+    result.fold((failure) => emit(AuthError(message: failure.message)), (_) {
+      // Create updated user with selected institution
+      final updatedUser = User(
+        uid: user.uid,
+        email: user.email,
+        name: user.name,
+        roles: user.roles,
+        currentInstitutionId: event.institutionId,
+        createdAt: user.createdAt,
+        updatedAt: DateTime.now(),
+      );
+      emit(InstitutionSelected(user: updatedUser));
+    });
   }
 }

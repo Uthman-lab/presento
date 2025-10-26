@@ -1,5 +1,5 @@
 import 'package:presento/imports.dart';
-import 'package:presento/modules/auth/presentation/presentation.dart';
+import 'package:presento/ui/auth/auth.ui.dart';
 
 class SuperAdminDashboard extends StatelessWidget {
   const SuperAdminDashboard({super.key});

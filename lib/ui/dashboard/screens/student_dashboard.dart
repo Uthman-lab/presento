@@ -1,14 +1,14 @@
 import 'package:presento/imports.dart';
-import 'package:presento/modules/auth/presentation/presentation.dart';
+import 'package:presento/ui/auth/auth.ui.dart';
 
-class InstitutionAdminDashboard extends StatelessWidget {
-  const InstitutionAdminDashboard({super.key});
+class StudentDashboard extends StatelessWidget {
+  const StudentDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Institution Admin Dashboard'),
+        title: const Text('Student Dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -22,15 +22,15 @@ class InstitutionAdminDashboard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.school, size: 64, color: Colors.blue),
+            Icon(Icons.school, size: 64, color: Colors.orange),
             SizedBox(height: 16),
             Text(
-              'Institution Admin Dashboard',
+              'Student Dashboard',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
             Text(
-              'Institution management and oversight',
+              'View your attendance and academic progress',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             SizedBox(height: 24),
@@ -39,11 +39,10 @@ class InstitutionAdminDashboard extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 16),
-            Text('• Manage Institution Users'),
-            Text('• Create and Manage Classes'),
-            Text('• Student Management'),
-            Text('• Attendance Reports'),
-            Text('• Institution Analytics'),
+            Text('• View Attendance Record'),
+            Text('• Check Class Schedule'),
+            Text('• View Notifications'),
+            Text('• Update Profile'),
           ],
         ),
       ),

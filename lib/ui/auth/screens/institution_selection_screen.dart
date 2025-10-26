@@ -1,4 +1,4 @@
-part of '../presentation.dart';
+part of '../auth.ui.dart';
 
 class InstitutionSelectionScreen extends StatefulWidget {
   const InstitutionSelectionScreen({super.key});
@@ -10,6 +10,8 @@ class InstitutionSelectionScreen extends StatefulWidget {
 
 class _InstitutionSelectionScreenState
     extends State<InstitutionSelectionScreen> {
+  String? selectedInstitutionId;
+
   @override
   void initState() {
     super.initState();
@@ -71,13 +73,34 @@ class _InstitutionSelectionScreenState
                     if (state is AuthLoading) {
                       return const Center(child: CircularProgressIndicator());
                     } else if (state is InstitutionsLoaded) {
-                      return _buildInstitutionList(context, state.institutions);
+                      return _buildInstitutionList(
+                        context,
+                        state.institutions,
+                        state.user,
+                      );
                     } else if (state is AuthError) {
                       return _buildErrorState(context, state.message);
                     } else {
                       return const Center(child: CircularProgressIndicator());
                     }
                   },
+                ),
+              ),
+
+              // Confirmation Button
+              Padding(
+                padding: const EdgeInsets.all(16.0),
+                child: ElevatedButton(
+                  onPressed: selectedInstitutionId != null
+                      ? () {
+                          context.read<AuthBloc>().add(
+                            InstitutionSelectionRequested(
+                              institutionId: selectedInstitutionId!,
+                            ),
+                          );
+                        }
+                      : null,
+                  child: const Text('Continue'),
                 ),
               ),
             ],
@@ -90,6 +113,7 @@ class _InstitutionSelectionScreenState
   Widget _buildInstitutionList(
     BuildContext context,
     List<Institution> institutions,
+    User user,
   ) {
     return ListView.builder(
       itemCount: institutions.length,
@@ -97,20 +121,17 @@ class _InstitutionSelectionScreenState
         final institution = institutions[index];
 
         // Get user role for this institution
-        final user = context.read<AuthBloc>().state is Authenticated
-            ? (context.read<AuthBloc>().state as Authenticated).user
-            : null;
-
         final userRole =
-            user?.getRoleForInstitution(institution.id)?.role ?? 'Unknown';
+            user.getRoleForInstitution(institution.id)?.role ?? 'Unknown';
 
         return InstitutionCard(
           institution: institution,
           userRole: userRole,
+          isSelected: institution.id == selectedInstitutionId,
           onTap: () {
-            context.read<AuthBloc>().add(
-              InstitutionSelectionRequested(institutionId: institution.id),
-            );
+            setState(() {
+              selectedInstitutionId = institution.id;
+            });
           },
         );
       },
@@ -150,5 +171,3 @@ class _InstitutionSelectionScreenState
     );
   }
 }
-
-

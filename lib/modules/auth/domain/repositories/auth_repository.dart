@@ -19,7 +19,7 @@ abstract class AuthRepository {
   );
 
   Future<Either<Failure, void>> selectInstitution(
-    String userId,
+    String userEmail,
     String institutionId,
   );
 }

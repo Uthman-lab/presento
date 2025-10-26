@@ -3,9 +3,13 @@ part of '../core.dart';
 abstract class BaseRepository {
   @protected
   Future<Either<Failure, T>> executeWithErrorHandling<T>(
-    Future<T> Function() operation,
-  ) async {
+    Future<T> Function() operation, {
+    NetworkInfo? networkInfo,
+  }) async {
     try {
+      // if (networkInfo != null && !await networkInfo.isConnected) {
+      //   return Left(NetworkFailure(message: AppConstants.networkErrorMessage));
+      // }
       final result = await operation();
       return Right(result);
     } on AuthException catch (e) {

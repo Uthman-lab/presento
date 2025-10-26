@@ -1,4 +1,4 @@
-part of '../presentation.dart';
+part of '../auth.ui.dart';
 
 class UserDetailsScreen extends StatelessWidget {
   const UserDetailsScreen({super.key});

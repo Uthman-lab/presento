@@ -1,6 +1,6 @@
 import 'package:presento/imports.dart';
 import 'package:presento/core/core.dart';
-import '../domain/domain.dart';
+import '../../modules/auth/domain/domain.dart';
 
 part 'bloc/auth_bloc.dart';
 part 'bloc/auth_event.dart';

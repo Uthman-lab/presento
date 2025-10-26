@@ -1,14 +1,14 @@
 import 'package:presento/imports.dart';
-import 'package:presento/modules/auth/presentation/presentation.dart';
+import 'package:presento/ui/auth/auth.ui.dart';
 
-class StakeholderDashboard extends StatelessWidget {
-  const StakeholderDashboard({super.key});
+class DashboardScreen extends StatelessWidget {
+  const DashboardScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Stakeholder Dashboard'),
+        title: const Text('Dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -22,32 +22,20 @@ class StakeholderDashboard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.family_restroom, size: 64, color: Colors.teal),
+            Icon(Icons.dashboard, size: 64, color: Colors.blue),
             SizedBox(height: 16),
             Text(
-              'Stakeholder Dashboard',
+              'Welcome to Dashboard!',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
             Text(
-              'View authorized student attendance records',
+              'Institution selection feature is working correctly.',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
-            SizedBox(height: 24),
-            Text(
-              'Available Actions:',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
-            ),
-            SizedBox(height: 16),
-            Text('• View Student Attendance'),
-            Text('• View Attendance Reports'),
-            Text('• Receive Notifications'),
-            Text('• Contact Institution'),
           ],
         ),
       ),
     );
   }
 }
-
-

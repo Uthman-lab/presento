@@ -11,7 +11,7 @@ abstract class AuthRemoteDataSource {
 
   Future<List<InstitutionModel>> getInstitutions(List<String> institutionIds);
 
-  Future<void> selectInstitution(String userId, String institutionId);
+  Future<void> selectInstitution(String userEmail, String institutionId);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -77,7 +77,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       // Fetch user document from Firestore
       final userDoc = await firestore
           .collection(AppConstants.usersCollection)
-          .doc(firebaseUser.uid)
+          .doc(firebaseUser.email!)
           .get();
 
       if (!userDoc.exists) return null;
@@ -127,11 +127,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> selectInstitution(String userId, String institutionId) async {
+  Future<void> selectInstitution(String userEmail, String institutionId) async {
     try {
       await firestore
           .collection(AppConstants.usersCollection)
-          .doc(userId)
+          .doc(userEmail)
           .update({
             'currentInstitutionId': institutionId,
             'updatedAt': FieldValue.serverTimestamp(),

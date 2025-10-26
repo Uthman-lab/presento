@@ -6,11 +6,9 @@ class SelectInstitutionUseCase {
   SelectInstitutionUseCase({required this.repository});
 
   Future<Either<Failure, void>> call({
-    required String userId,
+    required String userEmail,
     required String institutionId,
   }) async {
-    return await repository.selectInstitution(userId, institutionId);
+    return await repository.selectInstitution(userEmail, institutionId);
   }
 }
-
-

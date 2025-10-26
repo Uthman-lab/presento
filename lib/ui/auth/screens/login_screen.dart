@@ -1,4 +1,4 @@
-part of '../presentation.dart';
+part of '../auth.ui.dart';
 
 class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});

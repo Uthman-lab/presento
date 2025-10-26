@@ -30,7 +30,8 @@ class AppRouter {
           // User needs to select institution
           if (user.hasMultipleInstitutions) {
             // User has multiple institutions, show selection screen
-            if (state.uri.path == loginRoute) {
+            if (state.uri.path == loginRoute ||
+                state.uri.path == dashboardRoute) {
               return institutionSelectionRoute;
             }
             return null; // Allow navigation to institution selection

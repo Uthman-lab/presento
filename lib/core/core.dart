@@ -1,7 +1,7 @@
 import 'package:presento/imports.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
-import 'package:presento/modules/auth/presentation/presentation.dart';
-import 'package:presento/modules/dashboard/presentation/screens/dashboard_router.dart';
+import 'package:presento/ui/auth/auth.ui.dart';
+import 'package:presento/ui/dashboard/screens/dashboard_router.dart';
 
 part 'error/exceptions.dart';
 part 'error/failures.dart';

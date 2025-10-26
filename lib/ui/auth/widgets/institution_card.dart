@@ -1,4 +1,4 @@
-part of '../presentation.dart';
+part of '../auth.ui.dart';
 
 class InstitutionCard extends StatelessWidget {
   final Institution institution;

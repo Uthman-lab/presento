@@ -1,4 +1,4 @@
-part of '../presentation.dart';
+part of '../auth.ui.dart';
 
 class AuthTextField extends StatelessWidget {
   final String label;

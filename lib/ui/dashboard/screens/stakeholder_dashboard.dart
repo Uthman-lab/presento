@@ -1,14 +1,14 @@
 import 'package:presento/imports.dart';
-import 'package:presento/modules/auth/presentation/presentation.dart';
+import 'package:presento/ui/auth/auth.ui.dart';
 
-class StudentDashboard extends StatelessWidget {
-  const StudentDashboard({super.key});
+class StakeholderDashboard extends StatelessWidget {
+  const StakeholderDashboard({super.key});
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Student Dashboard'),
+        title: const Text('Stakeholder Dashboard'),
         actions: [
           IconButton(
             icon: const Icon(Icons.logout),
@@ -22,15 +22,15 @@ class StudentDashboard extends StatelessWidget {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.school, size: 64, color: Colors.orange),
+            Icon(Icons.family_restroom, size: 64, color: Colors.teal),
             SizedBox(height: 16),
             Text(
-              'Student Dashboard',
+              'Stakeholder Dashboard',
               style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
             ),
             SizedBox(height: 8),
             Text(
-              'View your attendance and academic progress',
+              'View authorized student attendance records',
               style: TextStyle(fontSize: 16, color: Colors.grey),
             ),
             SizedBox(height: 24),
@@ -39,10 +39,10 @@ class StudentDashboard extends StatelessWidget {
               style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600),
             ),
             SizedBox(height: 16),
-            Text('• View Attendance Record'),
-            Text('• Check Class Schedule'),
-            Text('• View Notifications'),
-            Text('• Update Profile'),
+            Text('• View Student Attendance'),
+            Text('• View Attendance Reports'),
+            Text('• Receive Notifications'),
+            Text('• Contact Institution'),
           ],
         ),
       ),

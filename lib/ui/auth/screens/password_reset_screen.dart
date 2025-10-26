@@ -1,4 +1,4 @@
-part of '../presentation.dart';
+part of '../auth.ui.dart';
 
 class PasswordResetScreen extends StatefulWidget {
   const PasswordResetScreen({super.key});
