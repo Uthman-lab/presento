@@ -19,6 +19,7 @@ export 'package:firebase_core/firebase_core.dart';
 // Storage & Network
 export 'package:shared_preferences/shared_preferences.dart';
 export 'package:connectivity_plus/connectivity_plus.dart';
+export 'package:http/http.dart';
 
 // Functional Programming
 export 'package:dartz/dartz.dart' hide State, Order;
@@ -28,3 +29,6 @@ export 'package:equatable/equatable.dart';
 export 'dart:convert';
 export 'dart:math';
 export 'package:intl/intl.dart' hide TextDirection;
+
+// Core
+export 'core/core.dart';
