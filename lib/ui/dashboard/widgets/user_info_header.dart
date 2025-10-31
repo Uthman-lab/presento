@@ -15,11 +15,26 @@ class UserInfoHeader extends StatelessWidget {
         }
 
         final user = state.user;
-        final institutionName =
-            user.currentInstitutionId ?? 'No Institution Selected';
         final roleEnum = user.currentRoleEnum;
         final roleDisplayName = roleEnum?.displayName ?? 'User';
         final roleIcon = roleEnum?.icon ?? Icons.person;
+
+        // Determine institution name based on state
+        final String institutionName;
+        if (state is InstitutionsLoaded) {
+          // Find institution name from institutions list
+          final institution = state.institutions
+              .where((inst) => inst.id == user.currentInstitutionId)
+              .firstOrNull;
+          institutionName = institution?.name ?? 'Unknown Institution';
+        } else if (user.currentInstitutionId != null &&
+            user.currentInstitutionId!.isNotEmpty) {
+          // Institution ID exists but name not loaded yet
+          institutionName = 'Loading institution...';
+        } else {
+          // No institution selected
+          institutionName = 'No Institution Selected';
+        }
 
         return Card(
           elevation: 2,

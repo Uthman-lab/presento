@@ -1,5 +1,6 @@
 import 'package:presento/imports.dart';
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
+import 'package:presento/modules/auth/domain/domain.dart';
 import 'package:presento/ui/auth/auth.ui.dart';
 import 'package:presento/ui/dashboard/screens/dashboard_router.dart';
 
