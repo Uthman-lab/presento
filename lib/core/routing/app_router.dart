@@ -20,12 +20,12 @@ class AppRouter {
         // Check if user has currentInstitutionId set
         if (user.currentInstitutionId != null &&
             user.currentInstitutionId!.isNotEmpty) {
-          // User has selected institution, redirect to dashboard
-          if (state.uri.path == loginRoute ||
-              state.uri.path == institutionSelectionRoute) {
+          // User has selected institution
+          if (state.uri.path == loginRoute) {
             return dashboardRoute;
           }
-          return null; // Allow navigation
+          // Allow navigation to institution selection for switching
+          return null;
         } else {
           // User needs to select institution
           if (user.hasMultipleInstitutions) {
@@ -73,7 +73,6 @@ class AppRouter {
         path: loginRoute,
         name: 'login',
         builder: (context, state) => const LoginScreen(),
-        redirect: (context, state) {},
       ),
       GoRoute(
         path: passwordResetRoute,

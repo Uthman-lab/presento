@@ -41,6 +41,10 @@ class User extends Equatable {
     return roles[currentInstitutionId]?.role;
   }
 
+  UserRole? get currentRoleEnum {
+    return UserRole.fromString(currentRole);
+  }
+
   @override
   List<Object?> get props => [
     uid,

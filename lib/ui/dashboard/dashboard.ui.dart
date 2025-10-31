@@ -1,0 +1,9 @@
+export 'screens/dashboard_screen.dart';
+export 'screens/dashboard_router.dart';
+export 'screens/super_admin_dashboard.dart';
+export 'screens/institution_admin_dashboard.dart';
+export 'screens/teacher_dashboard.dart';
+export 'screens/student_dashboard.dart';
+export 'screens/class_representative_dashboard.dart';
+export 'screens/stakeholder_dashboard.dart';
+export 'widgets/dashboard_widgets.dart';

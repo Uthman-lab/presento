@@ -1,6 +1,5 @@
 import 'package:presento/core/di/injection_container.dart';
 import 'package:presento/imports.dart';
-import 'core/core.dart';
 import 'modules/auth/auth.dart';
 
 void main() async {

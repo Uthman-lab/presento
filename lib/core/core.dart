@@ -12,6 +12,6 @@ part 'services/firebase_service.dart';
 part 'utils/constants.dart';
 part 'utils/validators.dart';
 part 'utils/extensions.dart';
-part 'utils/seed_data.dart';
+part 'utils/user_role.dart';
 part 'repositories/base_repository.dart';
 part 'repositories/repositories.dart';
