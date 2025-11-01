@@ -35,5 +35,29 @@ class InstitutionRepositoryImpl extends BaseRepository
       await remoteDataSource.selectInstitution(userEmail, institutionId);
     }, networkInfo: networkInfo);
   }
+
+  @override
+  Future<Either<Failure, Institution>> createInstitution(String name) async {
+    return executeWithErrorHandling(() async {
+      return await remoteDataSource.createInstitution(name);
+    }, networkInfo: networkInfo);
+  }
+
+  @override
+  Future<Either<Failure, Institution>> updateInstitution(
+    String institutionId,
+    String name,
+  ) async {
+    return executeWithErrorHandling(() async {
+      return await remoteDataSource.updateInstitution(institutionId, name);
+    }, networkInfo: networkInfo);
+  }
+
+  @override
+  Future<Either<Failure, void>> deleteInstitution(String institutionId) async {
+    return executeWithErrorHandling(() async {
+      await remoteDataSource.deleteInstitution(institutionId);
+    }, networkInfo: networkInfo);
+  }
 }
 

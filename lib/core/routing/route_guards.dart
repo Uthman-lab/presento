@@ -33,6 +33,21 @@ class RouteGuards {
     final authBloc = context.read<AuthBloc>();
     final authState = authBloc.state;
 
+    // Check if route requires super admin access
+    final currentPath = state.uri.path;
+    final isInstitutionRoute =
+        currentPath == AppRouter.institutionsRoute ||
+        currentPath == AppRouter.createInstitutionRoute ||
+        currentPath.startsWith('/institutions/');
+
+    if (isInstitutionRoute) {
+      final user = _getUserFromState(authState);
+      if (user == null || !user.isSuperAdmin) {
+        return AppRouter
+            .dashboardRoute; // Redirect non-super admins to dashboard
+      }
+    }
+
     // Handle all authenticated state variants
     if (authState is Authenticated ||
         authState is AllInstitutionsLoaded ||
@@ -49,6 +64,13 @@ class RouteGuards {
     }
 
     return null; // No redirect needed (e.g., AuthLoading, AuthInitial)
+  }
+
+  static User? _getUserFromState(AuthState authState) {
+    if (authState is Authenticated) {
+      return authState.user;
+    }
+    return null;
   }
 
   static String? _handleAuthenticatedUser(

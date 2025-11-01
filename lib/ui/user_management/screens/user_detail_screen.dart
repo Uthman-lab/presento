@@ -149,32 +149,45 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             ),
         ],
       ),
-      body: BlocListener<UserManagementBloc, UserManagementState>(
-        listener: (context, state) {
-          if (state is UserLoaded && !_isEditing) {
-            _initializeControllers(state.user);
-          } else if (state is UserOperationSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.green,
-              ),
-            );
-            if (state.user != null) {
-              _initializeControllers(state.user!);
-            } else {
-              // If user is null, it's a delete operation - navigate back
-              Future.microtask(() => context.pop());
-            }
-          } else if (state is UserManagementError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AllInstitutionsLoaded) {
+                setState(() {
+                  _institutions = state.institutions;
+                });
+              }
+            },
+          ),
+          BlocListener<UserManagementBloc, UserManagementState>(
+            listener: (context, state) {
+              if (state is UserLoaded && !_isEditing) {
+                _initializeControllers(state.user);
+              } else if (state is UserOperationSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                if (state.user != null) {
+                  _initializeControllers(state.user!);
+                } else {
+                  // If user is null, it's a delete operation - navigate back
+                  Future.microtask(() => context.pop());
+                }
+              } else if (state is UserManagementError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+          ),
+        ],
         child: BlocBuilder<UserManagementBloc, UserManagementState>(
           builder: (context, state) {
             if (state is UserManagementLoading) {

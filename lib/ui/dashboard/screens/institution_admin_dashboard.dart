@@ -2,8 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:presento/imports.dart';
 import 'package:presento/ui/auth/auth.ui.dart';
 import 'package:presento/ui/dashboard/widgets/dashboard_widgets.dart';
-import 'package:presento/ui/user_management/user_management.ui.dart';
-import 'package:presento/core/di/injection_container.dart' as di;
 
 class InstitutionAdminDashboard extends StatelessWidget {
   const InstitutionAdminDashboard({super.key});
@@ -174,15 +172,11 @@ class InstitutionAdminDashboard extends StatelessWidget {
                           institutionId = user.currentInstitutionId;
                         }
                         
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => BlocProvider(
-                              create: (context) => di.sl<UserManagementBloc>(),
-                              child: UserManagementScreen(institutionId: institutionId),
-                            ),
-                          ),
-                        );
+                        if (institutionId != null && institutionId.isNotEmpty) {
+                          context.push('${AppRouter.usersRoute}?institutionId=$institutionId');
+                        } else {
+                          context.push(AppRouter.usersRoute);
+                        }
                       },
                       iconColor: Colors.orange,
                     ),

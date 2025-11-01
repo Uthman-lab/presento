@@ -98,27 +98,40 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
         backgroundColor: Colors.red,
         foregroundColor: Colors.white,
       ),
-      body: BlocListener<UserManagementBloc, UserManagementState>(
-        listener: (context, state) {
-          if (state is UserOperationSuccess) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.green,
-              ),
-            );
-            // Pop and return true to indicate successful creation
-            // This will trigger refresh in the UserManagementScreen
-            context.pop(true);
-          } else if (state is UserManagementError) {
-            ScaffoldMessenger.of(context).showSnackBar(
-              SnackBar(
-                content: Text(state.message),
-                backgroundColor: Colors.red,
-              ),
-            );
-          }
-        },
+      body: MultiBlocListener(
+        listeners: [
+          BlocListener<AuthBloc, AuthState>(
+            listener: (context, state) {
+              if (state is AllInstitutionsLoaded) {
+                setState(() {
+                  _institutions = state.institutions;
+                });
+              }
+            },
+          ),
+          BlocListener<UserManagementBloc, UserManagementState>(
+            listener: (context, state) {
+              if (state is UserOperationSuccess) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.green,
+                  ),
+                );
+                // Pop and return true to indicate successful creation
+                // This will trigger refresh in the UserManagementScreen
+                context.pop(true);
+              } else if (state is UserManagementError) {
+                ScaffoldMessenger.of(context).showSnackBar(
+                  SnackBar(
+                    content: Text(state.message),
+                    backgroundColor: Colors.red,
+                  ),
+                );
+              }
+            },
+          ),
+        ],
         child: BlocBuilder<UserManagementBloc, UserManagementState>(
           builder: (context, state) {
             final isLoading = state is UserManagementLoading;

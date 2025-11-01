@@ -9,6 +9,10 @@ class AppRouter {
   static const String usersRoute = '/users';
   static const String userDetailRoute = '/users/:userId';
   static const String createUserRoute = '/users/create';
+  static const String institutionsRoute = '/institutions';
+  static const String institutionDetailRoute = '/institutions/:institutionId';
+  static const String createInstitutionRoute = '/institutions/create';
+  static const String editInstitutionRoute = '/institutions/:institutionId/edit';
 
   static final GoRouter router = GoRouter(
     initialLocation: loginRoute,
@@ -67,6 +71,65 @@ class AppRouter {
           return BlocProvider(
             create: (context) => di.sl<UserManagementBloc>(),
             child: UserDetailScreen(userId: userId),
+          );
+        },
+      ),
+      GoRoute(
+        path: institutionsRoute,
+        name: 'institutions',
+        builder: (context, state) => BlocProvider(
+          create: (context) => di.sl<InstitutionManagementBloc>(),
+          child: const InstitutionManagementScreen(),
+        ),
+      ),
+      GoRoute(
+        path: createInstitutionRoute,
+        name: 'create-institution',
+        builder: (context, state) => BlocProvider(
+          create: (context) => di.sl<InstitutionManagementBloc>(),
+          child: const InstitutionFormScreen(),
+        ),
+      ),
+      GoRoute(
+        path: institutionDetailRoute,
+        name: 'institution-detail',
+        builder: (context, state) {
+          final institutionId = state.pathParameters['institutionId'] ?? '';
+          return InstitutionDetailScreen(institutionId: institutionId);
+        },
+      ),
+      GoRoute(
+        path: editInstitutionRoute,
+        name: 'edit-institution',
+        builder: (context, state) {
+          final institutionId = state.pathParameters['institutionId'] ?? '';
+          // Load institution first, then show form
+          return BlocProvider(
+            create: (context) => di.sl<InstitutionManagementBloc>()
+              ..add(LoadInstitution(institutionId: institutionId)),
+            child: BlocBuilder<InstitutionManagementBloc,
+                InstitutionManagementState>(
+              builder: (context, state) {
+                if (state is InstitutionLoaded) {
+                  return InstitutionFormScreen(institution: state.institution);
+                }
+                if (state is InstitutionManagementError) {
+                  return Scaffold(
+                    appBar: AppBar(
+                      title: const Text('Error'),
+                      backgroundColor: Colors.red,
+                      foregroundColor: Colors.white,
+                    ),
+                    body: Center(
+                      child: Text(state.message),
+                    ),
+                  );
+                }
+                return const Scaffold(
+                  body: Center(child: CircularProgressIndicator()),
+                );
+              },
+            ),
           );
         },
       ),

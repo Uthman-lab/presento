@@ -3,11 +3,6 @@ import 'package:presento/imports.dart';
 import 'package:presento/modules/auth/auth.dart';
 import 'package:presento/ui/auth/auth.ui.dart';
 import 'package:presento/ui/dashboard/widgets/dashboard_widgets.dart';
-import 'package:presento/ui/dashboard/widgets/super_admin_institution_selector.dart';
-import 'package:presento/ui/user_management/user_management.ui.dart';
-import 'package:presento/core/di/injection_container.dart' as di;
-
-import '../../../modules/institution/domain/domain.dart';
 
 class SuperAdminDashboard extends StatefulWidget {
   const SuperAdminDashboard({super.key});
@@ -20,33 +15,6 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
   @override
   void initState() {
     super.initState();
-    // Load all institutions when dashboard initializes (if not already loaded)
-    WidgetsBinding.instance.addPostFrameCallback((_) {
-      final authBloc = context.read<AuthBloc>();
-      final currentState = authBloc.state;
-
-      // Only load if we don't already have AllInstitutionsLoaded state
-      if (currentState is! AllInstitutionsLoaded) {
-        authBloc.add(const AllInstitutionsLoadRequested());
-      }
-    });
-  }
-
-  void _handleInstitutionSelection(String institutionId) {
-    final authBloc = context.read<AuthBloc>();
-    final currentState = authBloc.state;
-
-    if (currentState is Authenticated ||
-        currentState is AllInstitutionsLoaded) {
-      // Use InstitutionSelectionRequested which will handle both setting and clearing
-      // Empty string will be converted to null in the bloc to clear the institution
-      authBloc.add(InstitutionSelectionRequested(institutionId: institutionId));
-
-      // After selection/clearing, reload all institutions to get updated state
-      Future.delayed(const Duration(milliseconds: 500), () {
-        authBloc.add(const AllInstitutionsLoadRequested());
-      });
-    }
   }
 
   @override
@@ -69,17 +37,6 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
       ),
       body: BlocBuilder<AuthBloc, AuthState>(
         builder: (context, state) {
-          List<Institution> institutions = [];
-          String? selectedInstitutionId;
-
-          if (state is AllInstitutionsLoaded) {
-            institutions = state.institutions;
-            selectedInstitutionId = state.user.currentInstitutionId;
-          } else if (state is Authenticated) {
-            selectedInstitutionId = state.user.currentInstitutionId;
-            // If loading, show loading indicator for institutions
-          }
-
           return SingleChildScrollView(
             padding: const EdgeInsets.all(16),
             child: Column(
@@ -87,22 +44,6 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
               children: [
                 // User Info Header
                 const UserInfoHeader(),
-                const SizedBox(height: 24),
-
-                // Institution Selector
-                if (state is AllInstitutionsLoaded)
-                  SuperAdminInstitutionSelector(
-                    institutions: institutions,
-                    selectedInstitutionId: selectedInstitutionId,
-                    onInstitutionSelected: _handleInstitutionSelection,
-                  )
-                else if (state is AuthLoading)
-                  const Card(
-                    child: Padding(
-                      padding: EdgeInsets.all(16.0),
-                      child: Center(child: CircularProgressIndicator()),
-                    ),
-                  ),
                 const SizedBox(height: 24),
 
                 // Quick Actions
@@ -116,32 +57,19 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
                 QuickActions(
                   actions: [
                     QuickAction(
-                      icon: Icons.add_business,
-                      label: 'Create\nInstitution',
-                      onTap: () => _showComingSoon(context),
+                      icon: Icons.business,
+                      label: 'View\nInstitutions',
+                      onTap: () {
+                        context.push(AppRouter.institutionsRoute);
+                      },
                     ),
                     QuickAction(
                       icon: Icons.people,
                       label: 'View All\nUsers',
                       onTap: () {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => BlocProvider(
-                              create: (context) => di.sl<UserManagementBloc>(),
-                              child: const UserManagementScreen(),
-                            ),
-                          ),
-                        );
+                        context.push(AppRouter.usersRoute);
                       },
                     ),
-                    if (selectedInstitutionId != null &&
-                        selectedInstitutionId.isNotEmpty)
-                      QuickAction(
-                        icon: Icons.visibility,
-                        label: 'View\nInstitution',
-                        onTap: () => _showInstitutionView(context),
-                      ),
                     QuickAction(
                       icon: Icons.settings,
                       label: 'System\nSettings',
@@ -155,15 +83,6 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
                   ],
                 ),
                 const SizedBox(height: 24),
-
-                // Institution Context (when selected)
-                if (selectedInstitutionId != null &&
-                    selectedInstitutionId.isNotEmpty)
-                  _buildInstitutionContext(
-                    context,
-                    institutions,
-                    selectedInstitutionId,
-                  ),
 
                 // System Statistics
                 Text(
@@ -243,7 +162,9 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
                           title: 'Institution Management',
                           subtitle:
                               'Create, view, and manage institutions across the system',
-                          onTap: () => _showComingSoon(context),
+                          onTap: () {
+                            context.push(AppRouter.institutionsRoute);
+                          },
                           iconColor: Colors.blue,
                         ),
                         DashboardCard(
@@ -252,16 +173,7 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
                           subtitle:
                               'Manage users across all institutions and roles',
                           onTap: () {
-                            Navigator.push(
-                              context,
-                              MaterialPageRoute(
-                                builder: (context) => BlocProvider(
-                                  create: (context) =>
-                                      di.sl<UserManagementBloc>(),
-                                  child: const UserManagementScreen(),
-                                ),
-                              ),
-                            );
+                            context.push(AppRouter.usersRoute);
                           },
                           iconColor: Colors.green,
                         ),
@@ -308,75 +220,10 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
     );
   }
 
-  Widget _buildInstitutionContext(
-    BuildContext context,
-    List<Institution> institutions,
-    String institutionId,
-  ) {
-    final theme = Theme.of(context);
-    final institution = institutions
-        .where((inst) => inst.id == institutionId)
-        .firstOrNull;
-
-    if (institution == null) return const SizedBox.shrink();
-
-    return Card(
-      color: theme.primaryColor.withOpacity(0.05),
-      shape: RoundedRectangleBorder(
-        borderRadius: BorderRadius.circular(12),
-        side: BorderSide(color: theme.primaryColor, width: 2),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Row(
-          children: [
-            Icon(Icons.business, color: theme.primaryColor, size: 32),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    'Viewing: ${institution.name}',
-                    style: theme.textTheme.titleMedium?.copyWith(
-                      fontWeight: FontWeight.bold,
-                      color: theme.primaryColor,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'You are viewing this institution\'s data',
-                    style: theme.textTheme.bodySmall?.copyWith(
-                      color: Colors.grey[600],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            TextButton.icon(
-              onPressed: () => _handleInstitutionSelection(''),
-              icon: const Icon(Icons.close),
-              label: const Text('Clear'),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
   void _showComingSoon(BuildContext context) {
     ScaffoldMessenger.of(context).showSnackBar(
       const SnackBar(
         content: Text('This feature is coming soon!'),
-        duration: Duration(seconds: 2),
-      ),
-    );
-  }
-
-  void _showInstitutionView(BuildContext context) {
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(
-        content: Text('Institution view feature coming soon!'),
         duration: Duration(seconds: 2),
       ),
     );

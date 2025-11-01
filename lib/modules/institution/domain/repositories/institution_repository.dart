@@ -11,5 +11,14 @@ abstract class InstitutionRepository {
     String userEmail,
     String? institutionId,
   );
+
+  Future<Either<Failure, Institution>> createInstitution(String name);
+
+  Future<Either<Failure, Institution>> updateInstitution(
+    String institutionId,
+    String name,
+  );
+
+  Future<Either<Failure, void>> deleteInstitution(String institutionId);
 }
 
