@@ -6,6 +6,7 @@ class User extends Equatable {
   final String name;
   final Map<String, InstitutionRole> roles;
   final String? currentInstitutionId;
+  final bool isSuperAdmin;
   final DateTime createdAt;
   final DateTime updatedAt;
 
@@ -15,13 +16,17 @@ class User extends Equatable {
     required this.name,
     required this.roles,
     this.currentInstitutionId,
+    this.isSuperAdmin = false,
     required this.createdAt,
     required this.updatedAt,
   });
 
-  bool get hasActiveRoles => roles.values.any((role) => role.isActive);
+  bool get hasActiveRoles =>
+      isSuperAdmin || roles.values.any((role) => role.isActive);
 
   List<String> get activeInstitutionIds {
+    // Super admin doesn't need institution IDs as they have access to all
+    if (isSuperAdmin) return [];
     return roles.entries
         .where((entry) => entry.value.isActive)
         .map((entry) => entry.key)
@@ -33,15 +38,19 @@ class User extends Equatable {
   }
 
   bool get hasMultipleInstitutions {
+    // Super admin doesn't need institution selection
+    if (isSuperAdmin) return false;
     return activeInstitutionIds.length > 1;
   }
 
   String? get currentRole {
+    if (isSuperAdmin) return 'super_admin';
     if (currentInstitutionId == null) return null;
     return roles[currentInstitutionId]?.role;
   }
 
   UserRole? get currentRoleEnum {
+    if (isSuperAdmin) return UserRole.superAdmin;
     return UserRole.fromString(currentRole);
   }
 
@@ -52,6 +61,7 @@ class User extends Equatable {
     name,
     roles,
     currentInstitutionId,
+    isSuperAdmin,
     createdAt,
     updatedAt,
   ];

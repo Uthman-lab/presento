@@ -7,6 +7,7 @@ class UserModel extends User {
     required super.name,
     required super.roles,
     super.currentInstitutionId,
+    super.isSuperAdmin = false,
     required super.createdAt,
     required super.updatedAt,
   });
@@ -14,6 +15,21 @@ class UserModel extends User {
   factory UserModel.fromJson(Map<String, dynamic> json) {
     final rolesMap = <String, InstitutionRoleModel>{};
     final rolesJson = json['roles'] as Map<String, dynamic>? ?? {};
+
+    // Check for isSuperAdmin field first (new format)
+    bool isSuperAdmin = json['isSuperAdmin'] as bool? ?? false;
+
+    // Backward compatibility: check if any role is 'super_admin' (legacy format)
+    if (!isSuperAdmin && rolesJson.isNotEmpty) {
+      for (final entry in rolesJson.entries) {
+        final roleData = entry.value as Map<String, dynamic>?;
+        final role = roleData?['role'] as String?;
+        if (role == 'super_admin') {
+          isSuperAdmin = true;
+          break;
+        }
+      }
+    }
 
     for (final entry in rolesJson.entries) {
       rolesMap[entry.key] = InstitutionRoleModel.fromJson(entry.value);
@@ -25,6 +41,7 @@ class UserModel extends User {
       name: json['name'] as String,
       roles: rolesMap,
       currentInstitutionId: json['currentInstitutionId'] as String?,
+      isSuperAdmin: isSuperAdmin,
       createdAt: parseDateTime(json['createdAt']),
       updatedAt: parseDateTime(json['updatedAt']),
     );
@@ -36,6 +53,7 @@ class UserModel extends User {
       email: firebaseUser.email ?? '',
       name: firebaseUser.displayName ?? '',
       roles: const {},
+      isSuperAdmin: false,
       createdAt: DateTime.now(),
       updatedAt: DateTime.now(),
     );
@@ -53,6 +71,7 @@ class UserModel extends User {
       'name': name,
       'roles': rolesJson,
       'currentInstitutionId': currentInstitutionId,
+      'isSuperAdmin': isSuperAdmin,
       'createdAt': createdAt.toIso8601String(),
       'updatedAt': updatedAt.toIso8601String(),
     };

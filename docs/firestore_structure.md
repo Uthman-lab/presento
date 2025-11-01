@@ -15,15 +15,20 @@ This document describes the optimized Firestore database structure for the Task 
 
 ```
 /users/{userId}/
+├── uid: string (Firebase Auth UID)
 ├── email: string
 ├── name: string
+├── isSuperAdmin: boolean (optional, default: false)
+│   └── If true, user has system-wide access to all institutions
 ├── roles: map<institutionId, InstitutionRole>
 │   └── {institutionId}: {
-│       role: string (super_admin, institution_admin, teacher, student, class_rep, stakeholder),
+│       role: string (institution_admin, teacher, student, class_rep, stakeholder),
 │       assignedClassId: string (optional, for class_reps),
 │       isActive: boolean,
 │       joinedAt: timestamp
 │   }
+│   └── Note: Super admin may have empty roles map or legacy roles for backward compatibility
+├── currentInstitutionId: string (optional)
 ├── createdAt: timestamp
 └── updatedAt: timestamp
 
@@ -123,40 +128,63 @@ institutions/{id}/attendance
 
 ## Security Rules
 
-Role-based access control with multi-tenant support:
+Role-based access control with multi-tenant support and super admin privileges:
 
 ```javascript
-// Users can only read their own profile
-match /users/{userId} {
-  allow read: if request.auth.uid == userId;
+// Helper function to check if user is super admin
+function isSuperAdmin() {
+  return isAuthenticated() && getUserData().isSuperAdmin == true;
 }
 
-// Institution access requires active role
+// Institution access requires active role OR super admin
+function hasInstitutionAccess(institutionId) {
+  return isAuthenticated() && (
+    isSuperAdmin() ||
+    (institutionId in getUserData().roles 
+      && getUserData().roles[institutionId].isActive == true)
+  );
+}
+
+// Users can read their own profile, super admin can read any profile
+match /users/{userId} {
+  allow read: if isAuthenticated() && (request.auth.uid == userId || isSuperAdmin());
+}
+
+// Institution access: super admin has access to all institutions
 match /institutions/{institutionId} {
-  allow read: if hasInstitutionAccess(institutionId);
+  allow read: if isSuperAdmin() || hasInstitutionAccess(institutionId);
+  allow write: if canManageInstitution(institutionId);
   
-  // Attendance can be marked by institution_admin, teacher, or class_rep
+  // Attendance can be marked by super admin, institution_admin, teacher, or class_rep
   match /attendance/{attendanceId} {
-    allow read: if hasInstitutionAccess(institutionId);
+    allow read: if isSuperAdmin() || hasInstitutionAccess(institutionId);
     allow write: if canMarkAttendance(institutionId);
     
     match /records/{studentId} {
-      allow read: if hasInstitutionAccess(institutionId);
+      allow read: if isSuperAdmin() || hasInstitutionAccess(institutionId);
       allow write: if canMarkAttendance(institutionId);
     }
   }
 }
 ```
 
+**Super Admin Privileges:**
+- ✅ Read access to all user profiles
+- ✅ Read/write access to all institutions and their subcollections
+- ✅ Can mark attendance in any institution
+- ✅ Can manage any institution (create, update, delete)
+- ✅ Bypasses all institution-based access checks
+
 ## Example Documents
 
-### User Document
+### Regular User Document
 
 ```json
 {
-  "id": "user123",
+  "uid": "firebase-auth-uid-123",
   "email": "john@example.com",
   "name": "John Doe",
+  "isSuperAdmin": false,
   "roles": {
     "tech_university_2024": {
       "role": "institution_admin",
@@ -170,10 +198,33 @@ match /institutions/{institutionId} {
       "joinedAt": "2024-02-20T14:30:00Z"
     }
   },
+  "currentInstitutionId": "tech_university_2024",
   "createdAt": "2024-01-15T10:00:00Z",
   "updatedAt": "2024-03-10T09:15:00Z"
 }
 ```
+
+### Super Admin User Document
+
+```json
+{
+  "uid": "firebase-auth-uid-456",
+  "email": "superadmin@system.com",
+  "name": "Super Administrator",
+  "isSuperAdmin": true,
+  "roles": {},
+  "currentInstitutionId": null,
+  "createdAt": "2024-01-01T00:00:00Z",
+  "updatedAt": "2024-01-15T10:30:00Z"
+}
+```
+
+**Notes:**
+- Super admin has `isSuperAdmin: true` field
+- Super admin doesn't require institution roles (roles map can be empty)
+- Super admin has system-wide access to all institutions without explicit roles
+- Super admin bypasses institution selection in the UI
+- `currentInstitutionId` is optional for super admin (can be null)
 
 ### Attendance Parent Document
 

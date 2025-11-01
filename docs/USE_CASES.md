@@ -7,9 +7,14 @@ This document outlines the use cases for the Task Master Attendance System, a co
 ## Actors
 
 ### 1. Super Admin
-- **Description**: System administrator with global access across all institutions
-- **Capabilities**: Full system access, user management, institution management, system configuration
-- **Access Level**: Global
+- **Description**: System-wide administrator with global access to all institutions without requiring institution-specific roles
+- **Capabilities**: Full system access, user management, institution management, system configuration, can perform all actions in every institution
+- **Access Level**: Global (system-wide, not tied to any specific institution)
+- **Key Characteristics**:
+  - Does not require institution roles or institution selection
+  - Bypasses institution-based access checks
+  - Can access, read, and write data in all institutions
+  - Directly navigates to dashboard without institution selection screen
 
 ### 2. Institution Admin
 - **Description**: Administrator within a specific institution
@@ -47,24 +52,29 @@ This document outlines the use cases for the Task Master Attendance System, a co
 - **Main Flow**:
   1. User enters email and password
   2. System validates credentials
-  3. System checks user's institution roles
+  3. System checks user's role and super admin status
   4. System redirects to appropriate dashboard
 - **Post-conditions**: User is logged in and redirected to role-appropriate dashboard
 - **Alternative Flows**:
   - Invalid credentials: Display error message
-  - No institution access: Prompt for institution selection
+  - Super Admin: Directly redirects to Super Admin Dashboard (bypasses institution selection)
+  - Regular users with no institution access: Prompt for institution selection
+  - Regular users with single institution: Auto-select institution and redirect to dashboard
+  - Regular users with multiple institutions: Prompt for institution selection
 - **Priority**: P0
 
 #### UC-002: Institution Selection
-- **Actor**: User with multiple institution access
+- **Actor**: User with multiple institution access (excluding Super Admin)
 - **Description**: User selects which institution context to work in
-- **Pre-conditions**: User is logged in and has access to multiple institutions
+- **Pre-conditions**: User is logged in, has access to multiple institutions, and is not a Super Admin
 - **Main Flow**:
   1. System displays list of accessible institutions
   2. User selects institution
   3. System updates user context
   4. System redirects to institution-specific dashboard
 - **Post-conditions**: User context is set to selected institution
+- **Alternative Flows**:
+  - Super Admin: Bypasses this use case entirely, goes directly to Super Admin Dashboard
 - **Priority**: P0
 
 #### UC-003: User Profile Management
@@ -84,14 +94,15 @@ This document outlines the use cases for the Task Master Attendance System, a co
 #### UC-004: Create Institution
 - **Actor**: Super Admin
 - **Description**: Super Admin creates a new institution in the system
-- **Pre-conditions**: Super Admin is logged in
+- **Pre-conditions**: Super Admin is logged in (no institution context required)
 - **Main Flow**:
-  1. Super Admin navigates to institution management
+  1. Super Admin navigates to institution management (from Super Admin Dashboard)
   2. Super Admin clicks "Create New Institution"
   3. Super Admin enters institution details (name, description)
   4. System validates and creates institution
-  5. System assigns Super Admin as Institution Admin
-- **Post-conditions**: New institution is created and accessible
+  5. System creates institution document in Firestore
+- **Post-conditions**: New institution is created and accessible system-wide
+- **Notes**: Super Admin can create institutions without having explicit roles in them
 - **Priority**: P0
 
 #### UC-005: Manage Institution Users

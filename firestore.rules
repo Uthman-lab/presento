@@ -11,10 +11,16 @@ service cloud.firestore {
       return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
     }
     
+    function isSuperAdmin() {
+      return isAuthenticated() && getUserData().isSuperAdmin == true;
+    }
+    
     function hasInstitutionAccess(institutionId) {
-      return isAuthenticated() 
-        && institutionId in getUserData().roles 
-        && getUserData().roles[institutionId].isActive == true;
+      return isAuthenticated() && (
+        isSuperAdmin() ||
+        (institutionId in getUserData().roles 
+          && getUserData().roles[institutionId].isActive == true)
+      );
     }
     
     function getUserRole(institutionId) {
@@ -22,47 +28,63 @@ service cloud.firestore {
     }
     
     function canMarkAttendance(institutionId) {
-      return hasInstitutionAccess(institutionId) 
-        && getUserRole(institutionId) in ['admin', 'supervisor', 'class_rep'];
+      return isSuperAdmin() || (
+        hasInstitutionAccess(institutionId) 
+        && getUserRole(institutionId) in ['admin', 'supervisor', 'class_rep']
+      );
+    }
+    
+    function canManageInstitution(institutionId) {
+      return isSuperAdmin() || (
+        hasInstitutionAccess(institutionId) 
+        && getUserRole(institutionId) == 'admin'
+      );
     }
     
     // Users collection
     match /users/{userId} {
-      allow read: if isAuthenticated() && request.auth.uid == userId;
+      allow read: if isAuthenticated() && (request.auth.uid == userId || isSuperAdmin());
       allow create: if isAuthenticated() && request.auth.uid == userId;
-      allow update: if isAuthenticated() 
-        && request.auth.uid == userId
-        && request.resource.data.roles == resource.data.roles;
+      allow update: if isAuthenticated() && request.auth.uid == userId && (
+        // Regular users can update but not change isSuperAdmin or roles
+        (request.resource.data.roles == resource.data.roles
+          && request.resource.data.isSuperAdmin == resource.data.isSuperAdmin) ||
+        // Super admin can update isSuperAdmin field (for managing other super admins)
+        (isSuperAdmin() && request.resource.data.isSuperAdmin == true)
+      );
     }
     
     // Institutions
     match /institutions/{institutionId} {
-      allow read: if hasInstitutionAccess(institutionId);
-      allow write: if hasInstitutionAccess(institutionId) 
-        && getUserRole(institutionId) == 'admin';
+      allow read: if isSuperAdmin() || hasInstitutionAccess(institutionId);
+      allow write: if canManageInstitution(institutionId);
       
       // Classes
       match /classes/{classId} {
-        allow read: if hasInstitutionAccess(institutionId);
-        allow write: if hasInstitutionAccess(institutionId) 
-          && getUserRole(institutionId) in ['admin', 'supervisor'];
+        allow read: if isSuperAdmin() || hasInstitutionAccess(institutionId);
+        allow write: if isSuperAdmin() || (
+          hasInstitutionAccess(institutionId) 
+          && getUserRole(institutionId) in ['admin', 'supervisor']
+        );
       }
       
       // Students
       match /students/{studentId} {
-        allow read: if hasInstitutionAccess(institutionId);
-        allow write: if hasInstitutionAccess(institutionId) 
-          && getUserRole(institutionId) in ['admin', 'supervisor'];
+        allow read: if isSuperAdmin() || hasInstitutionAccess(institutionId);
+        allow write: if isSuperAdmin() || (
+          hasInstitutionAccess(institutionId) 
+          && getUserRole(institutionId) in ['admin', 'supervisor']
+        );
       }
       
       // Attendance parent documents
       match /attendance/{attendanceId} {
-        allow read: if hasInstitutionAccess(institutionId);
+        allow read: if isSuperAdmin() || hasInstitutionAccess(institutionId);
         allow write: if canMarkAttendance(institutionId);
         
         // Individual attendance records subcollection
         match /records/{studentId} {
-          allow read: if hasInstitutionAccess(institutionId);
+          allow read: if isSuperAdmin() || hasInstitutionAccess(institutionId);
           allow write: if canMarkAttendance(institutionId);
         }
       }

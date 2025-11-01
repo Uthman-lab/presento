@@ -109,6 +109,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
 
+    // Super admin doesn't need institution loading, they have access to all
+    if (user.isSuperAdmin) {
+      emit(Authenticated(user: user));
+      return;
+    }
+
     final institutionIds = user.activeInstitutionIds;
     if (institutionIds.isEmpty) {
       emit(const AuthError(message: 'No institutions found'));
@@ -147,6 +153,12 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
 
+    // Super admin doesn't need institution selection, but handle gracefully if called
+    if (user.isSuperAdmin) {
+      emit(Authenticated(user: user));
+      return;
+    }
+
     // Await the institution selection
     final result = await selectInstitutionUseCase(
       userEmail: user.email,
@@ -161,6 +173,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         name: user.name,
         roles: user.roles,
         currentInstitutionId: event.institutionId,
+        isSuperAdmin: user.isSuperAdmin,
         createdAt: user.createdAt,
         updatedAt: DateTime.now(),
       );

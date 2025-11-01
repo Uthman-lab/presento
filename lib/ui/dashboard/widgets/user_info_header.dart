@@ -21,7 +21,10 @@ class UserInfoHeader extends StatelessWidget {
 
         // Determine institution name based on state
         final String institutionName;
-        if (state is InstitutionsLoaded) {
+        if (user.isSuperAdmin) {
+          // Super admin has system-wide access, no institution needed
+          institutionName = 'System Administrator';
+        } else if (state is InstitutionsLoaded) {
           // Find institution name from institutions list
           final institution = state.institutions
               .where((inst) => inst.id == user.currentInstitutionId)
@@ -30,7 +33,8 @@ class UserInfoHeader extends StatelessWidget {
         } else if (user.currentInstitutionId != null &&
             user.currentInstitutionId!.isNotEmpty) {
           // Institution ID exists but name not loaded yet
-          institutionName = 'Loading institution...';
+          institutionName =
+              user.currentInstitutionId?.replaceAll("_", " ") ?? "";
         } else {
           // No institution selected
           institutionName = 'No Institution Selected';
@@ -72,11 +76,13 @@ class UserInfoHeader extends StatelessWidget {
                             color: theme.primaryColor,
                           ),
                           const SizedBox(width: 4),
-                          Text(
-                            roleDisplayName,
-                            style: theme.textTheme.bodyMedium?.copyWith(
-                              color: theme.primaryColor,
-                              fontWeight: FontWeight.w500,
+                          Expanded(
+                            child: Text(
+                              roleDisplayName,
+                              style: theme.textTheme.bodyMedium?.copyWith(
+                                color: theme.primaryColor,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
                         ],
@@ -100,8 +106,8 @@ class UserInfoHeader extends StatelessWidget {
                     ],
                   ),
                 ),
-                // Institution Switch Button
-                if (user.hasMultipleInstitutions)
+                // Institution Switch Button (not shown for super admin)
+                if (!user.isSuperAdmin && user.hasMultipleInstitutions)
                   IconButton(
                     onPressed: () =>
                         context.push(AppRouter.institutionSelectionRoute),

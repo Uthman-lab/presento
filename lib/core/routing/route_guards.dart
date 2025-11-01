@@ -50,6 +50,15 @@ class RouteGuards {
     String currentPath,
     AuthBloc authBloc,
   ) {
+    // Super admin bypasses institution selection and goes directly to dashboard
+    if (user.isSuperAdmin) {
+      if (currentPath == AppRouter.loginRoute ||
+          currentPath == AppRouter.institutionSelectionRoute) {
+        return AppRouter.dashboardRoute;
+      }
+      return null; // Allow navigation to dashboard
+    }
+
     // Check if user has currentInstitutionId set
     if (user.currentInstitutionId != null &&
         user.currentInstitutionId!.isNotEmpty) {
@@ -70,6 +79,15 @@ class RouteGuards {
     String currentPath,
     AuthBloc authBloc,
   ) {
+    // Super admin should not reach here, but handle it just in case
+    if (user.isSuperAdmin) {
+      if (currentPath == AppRouter.loginRoute ||
+          currentPath == AppRouter.dashboardRoute) {
+        return AppRouter.dashboardRoute;
+      }
+      return null;
+    }
+
     if (user.hasMultipleInstitutions) {
       // User has multiple institutions, show selection screen
       if (currentPath == AppRouter.loginRoute ||
