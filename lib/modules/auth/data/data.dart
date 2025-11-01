@@ -1,7 +1,6 @@
 import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:presento/imports.dart';
-import 'package:presento/modules/institution/institution.dart'
-    show InstitutionRole, InstitutionRoleModel;
+import 'package:presento/modules/institution/institution.dart';
 import '../../../core/utils/helper_functions.dart';
 import '../domain/domain.dart';
 

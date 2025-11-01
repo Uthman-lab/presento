@@ -44,7 +44,7 @@ class User extends Equatable {
   }
 
   String? get currentRole {
-    if (isSuperAdmin) return 'super_admin';
+    if (isSuperAdmin) return superAdminRole;
     if (currentInstitutionId == null) return null;
     return roles[currentInstitutionId]?.role;
   }

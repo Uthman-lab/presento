@@ -102,17 +102,17 @@ class InstitutionCard extends StatelessWidget {
 
   String _getRoleDisplayName(String role) {
     switch (role) {
-      case 'super_admin':
+      case superAdminRole:
         return 'Super Administrator';
-      case 'institution_admin':
+      case adminRole:
         return 'Institution Administrator';
-      case 'teacher':
+      case teacherRole:
         return 'Teacher';
-      case 'student':
+      case studentRole:
         return 'Student';
-      case 'class_rep':
+      case classRepresentativeRole:
         return 'Class Representative';
-      case 'stakeholder':
+      case stakeholderRole:
         return 'Stakeholder';
       default:
         return role.replaceAll('_', ' ').toUpperCase();

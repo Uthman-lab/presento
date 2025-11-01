@@ -54,7 +54,7 @@ class _InstitutionRoleEditorState extends State<InstitutionRoleEditor> {
                     if (checked == true) {
                       // Add role
                       editedRoles[institutionId] = InstitutionRole(
-                        role: AppConstants.teacherRole, // Default role
+                        role: teacherRole, // Default role
                         isActive: true,
                         joinedAt: DateTime.now(),
                       );
@@ -84,10 +84,10 @@ class _InstitutionRoleEditorState extends State<InstitutionRoleEditor> {
                               ),
                               items:
                                   [
-                                    AppConstants.teacherRole,
-                                    AppConstants.studentRole,
-                                    AppConstants.classRepRole,
-                                    AppConstants.stakeholderRole,
+                                    teacherRole,
+                                    studentRole,
+                                    classRepresentativeRole,
+                                    stakeholderRole,
                                   ].map((role) {
                                     return DropdownMenuItem(
                                       value: role,
@@ -156,23 +156,23 @@ class _InstitutionRoleEditorState extends State<InstitutionRoleEditor> {
 
   String _normalizeRole(String? role) {
     if (role == null || role.isEmpty) {
-      return AppConstants.teacherRole; // Default fallback
+      return teacherRole; // Default fallback
     }
 
     // Normalize legacy/variant role names to canonical forms
     switch (role.toLowerCase()) {
       case 'class_representative':
       case 'class_rep':
-        return AppConstants.classRepRole;
+        return classRepresentativeRole;
       case 'teacher':
-        return AppConstants.teacherRole;
+        return teacherRole;
       case 'student':
-        return AppConstants.studentRole;
+        return studentRole;
       case 'stakeholder':
-        return AppConstants.stakeholderRole;
+        return stakeholderRole;
       default:
         // If role doesn't match, return first valid option as fallback
-        return AppConstants.teacherRole;
+        return teacherRole;
     }
   }
 }

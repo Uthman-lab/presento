@@ -13,14 +13,15 @@ class SortDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<UserSortOption>(
-      value: currentSort,
+      initialValue: currentSort,
       isExpanded: true,
       decoration: InputDecoration(
         labelText: 'Sort By',
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(8),
+        border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 12,
+          vertical: 16,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
         prefixIcon: const Icon(Icons.sort),
       ),
       items: [
@@ -214,4 +215,3 @@ class SortDropdown extends StatelessWidget {
     );
   }
 }
-

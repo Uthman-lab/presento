@@ -62,7 +62,7 @@ class UserListTile extends StatelessWidget {
               children: [
                 if (user.isSuperAdmin)
                   const UserRoleChip(
-                    role: 'super_admin',
+                    role: superAdminRole,
                     isSuperAdmin: true,
                   ),
                 ...user.roles.entries.map((entry) {

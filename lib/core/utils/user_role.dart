@@ -1,5 +1,12 @@
 part of '../core.dart';
 
+const String superAdminRole = 'super_admin';
+const String adminRole = 'admin';
+const String teacherRole = 'teacher';
+const String studentRole = 'student';
+const String classRepresentativeRole = 'class_rep';
+const String stakeholderRole = 'stakeholder';
+
 enum UserRole {
   superAdmin,
   admin,
@@ -11,17 +18,17 @@ enum UserRole {
   // Convert from string (from Firestore)
   static UserRole? fromString(String? roleString) {
     switch (roleString) {
-      case 'super_admin':
+      case superAdminRole:
         return UserRole.superAdmin;
-      case 'admin':
+      case adminRole:
         return UserRole.admin;
-      case 'teacher':
+      case teacherRole:
         return UserRole.teacher;
-      case 'student':
+      case studentRole:
         return UserRole.student;
-      case 'class_rep':
+      case classRepresentativeRole:
         return UserRole.classRepresentative;
-      case 'stakeholder':
+      case stakeholderRole:
         return UserRole.stakeholder;
       default:
         return null;
@@ -32,17 +39,17 @@ enum UserRole {
   String toFirestoreString() {
     switch (this) {
       case UserRole.superAdmin:
-        return 'super_admin';
+        return superAdminRole;
       case UserRole.admin:
-        return 'admin';
+        return adminRole;
       case UserRole.teacher:
-        return 'teacher';
+        return teacherRole;
       case UserRole.student:
-        return 'student';
+        return studentRole;
       case UserRole.classRepresentative:
-        return 'class_rep';
+        return classRepresentativeRole;
       case UserRole.stakeholder:
-        return 'stakeholder';
+        return stakeholderRole;
     }
   }
 }

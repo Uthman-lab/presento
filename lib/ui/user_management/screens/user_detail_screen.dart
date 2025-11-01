@@ -258,7 +258,7 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                               const SizedBox(height: 16),
                               if (user.isSuperAdmin)
                                 const UserRoleChip(
-                                  role: 'super_admin',
+                                  role: superAdminRole,
                                   isSuperAdmin: true,
                                 ),
                               const SizedBox(height: 8),

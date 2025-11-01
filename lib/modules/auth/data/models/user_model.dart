@@ -24,7 +24,7 @@ class UserModel extends User {
       for (final entry in rolesJson.entries) {
         final roleData = entry.value as Map<String, dynamic>?;
         final role = roleData?['role'] as String?;
-        if (role == 'super_admin') {
+        if (role == superAdminRole) {
           isSuperAdmin = true;
           break;
         }

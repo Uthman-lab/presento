@@ -35,12 +35,4 @@ class AppConstants {
   static const String passwordResetRoute = '/password-reset';
   static const String institutionSelectionRoute = '/institution-selection';
   static const String dashboardRoute = '/dashboard';
-
-  // User Roles
-  static const String superAdminRole = 'super_admin';
-  static const String institutionAdminRole = 'institution_admin';
-  static const String teacherRole = 'teacher';
-  static const String studentRole = 'student';
-  static const String classRepRole = 'class_rep';
-  static const String stakeholderRole = 'stakeholder';
 }

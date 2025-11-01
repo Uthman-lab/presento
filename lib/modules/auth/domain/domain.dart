@@ -1,6 +1,5 @@
 import 'package:presento/imports.dart';
-import 'package:presento/modules/institution/institution.dart'
-    show Institution, InstitutionRole;
+import 'package:presento/modules/institution/institution.dart';
 
 part 'entities/user.dart';
 part 'repositories/auth_repository.dart';
