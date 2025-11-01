@@ -31,7 +31,6 @@ abstract class AuthRemoteDataSource {
   Future<UserModel> updateUser({
     required String userId,
     String? name,
-    String? email,
     bool? isSuperAdmin,
     Map<String, InstitutionRole>? roles,
   });
@@ -42,10 +41,12 @@ abstract class AuthRemoteDataSource {
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   final FirebaseAuth firebaseAuth;
   final FirebaseFirestore firestore;
+  final FirebaseFunctions cloudFunctions;
 
   const AuthRemoteDataSourceImpl({
     required this.firebaseAuth,
     required this.firestore,
+    required this.cloudFunctions,
   });
 
   @override
@@ -229,8 +230,8 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           }
         }
 
-        userData['uid'] =
-            userData['uid'] ?? doc.id; // Fallback to email if uid missing
+        // Use email as uid for listing (uid not stored in Firestore)
+        userData['uid'] = doc.id; // doc.id is the email
         final userModel = UserModel.fromJson(userData);
         users.add(userModel);
       }
@@ -244,29 +245,19 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   @override
   Future<UserModel> getUserById(String userId) async {
     try {
-      // Try to get by email first (document ID is email)
-      DocumentSnapshot userDoc = await firestore
+      // Get by email (document ID is email)
+      final userDoc = await firestore
           .collection(AppConstants.usersCollection)
           .doc(userId)
           .get();
 
-      // If not found by email, try searching by UID
       if (!userDoc.exists) {
-        final querySnapshot = await firestore
-            .collection(AppConstants.usersCollection)
-            .where('uid', isEqualTo: userId)
-            .limit(1)
-            .get();
-
-        if (querySnapshot.docs.isEmpty) {
-          throw const AuthException(message: 'User not found');
-        }
-
-        userDoc = querySnapshot.docs.first;
+        throw const AuthException(message: 'User not found');
       }
 
       final userData = userDoc.data() as Map<String, dynamic>;
-      userData['uid'] = userData['uid'] ?? userDoc.id;
+      // Use email as uid (uid not stored in Firestore)
+      userData['uid'] = userDoc.id;
 
       return UserModel.fromJson(userData);
     } on FirebaseException catch (e) {
@@ -287,19 +278,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     Map<String, InstitutionRole> roles = const {},
   }) async {
     try {
-      // Create Firebase Auth user
-      final credential = await firebaseAuth.createUserWithEmailAndPassword(
-        email: email,
-        password: password,
-      );
-
-      if (credential.user == null) {
-        throw const AuthException(message: 'Failed to create user');
-      }
-
-      final uid = credential.user!.uid;
-
-      // Convert roles to JSON
+      // Convert roles to JSON format for Cloud Function
       final rolesJson = <String, dynamic>{};
       for (final entry in roles.entries) {
         rolesJson[entry.key] = InstitutionRoleModel.fromEntity(
@@ -307,33 +286,73 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
         ).toJson();
       }
 
-      // Create Firestore user document (using email as document ID)
-      final now = DateTime.now();
-      final userData = {
-        'uid': uid,
+      // Call Cloud Function to create user using Admin SDK
+      // This preserves the admin's session (doesn't sign in the new user)
+      final callable = cloudFunctions.httpsCallable('createUser');
+      final result = await callable.call({
         'email': email,
+        'password': password,
         'name': name,
         'isSuperAdmin': isSuperAdmin,
         'roles': rolesJson,
-        'createdAt': now.toIso8601String(),
-        'updatedAt': now.toIso8601String(),
-      };
+      });
 
-      await firestore
-          .collection(AppConstants.usersCollection)
-          .doc(email)
-          .set(userData);
+      // Check if the cloud function returned an error
+      // Convert from Map<Object?, Object?> to Map<String, dynamic> recursively
+      if (result.data == null) {
+        throw const AuthException(
+          message: 'Failed to create user: No response from server',
+        );
+      }
 
-      // Send password reset email so user can set their own password
-      await firebaseAuth.sendPasswordResetEmail(email: email);
+      // Recursively convert the response data to handle nested maps
+      final responseData =
+          convertMapRecursively(result.data) as Map<String, dynamic>;
 
-      // Return created user
-      userData['uid'] = uid;
+      if (responseData['success'] == false || responseData['success'] == null) {
+        final errorMessage =
+            responseData['error'] as String? ?? 'Failed to create user';
+        throw AuthException(message: errorMessage);
+      }
+
+      // Extract user data from response (already converted recursively)
+      final userData = responseData['user'] as Map<String, dynamic>?;
+      if (userData == null) {
+        throw const AuthException(
+          message: 'Failed to create user: No user data returned',
+        );
+      }
+
+      // Return created user as UserModel
       return UserModel.fromJson(userData);
-    } on FirebaseAuthException catch (e) {
-      throw _handleFirebaseAuthException(e);
+    } on FirebaseFunctionsException catch (e) {
+      // Handle specific function error codes
+      switch (e.code) {
+        case 'permission-denied':
+          throw AuthException(
+            message: 'Permission denied: Only super admins can create users',
+          );
+        case 'already-exists':
+          throw AuthException(message: 'User with this email already exists');
+        case 'invalid-argument':
+          throw AuthException(
+            message: e.message ?? 'Invalid arguments provided',
+          );
+        case 'unauthenticated':
+          throw AuthException(message: 'Authentication required');
+        default:
+          throw ServerException(
+            message: 'Failed to create user: ${e.message ?? e.code}',
+          );
+      }
     } on FirebaseException catch (e) {
       throw ServerException(message: 'Firebase error: ${e.message}');
+    } on AuthException {
+      rethrow;
+    } catch (e) {
+      throw ServerException(
+        message: 'Unexpected error creating user: ${e.toString()}',
+      );
     }
   }
 
@@ -341,127 +360,116 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   Future<UserModel> updateUser({
     required String userId,
     String? name,
-    String? email,
     bool? isSuperAdmin,
     Map<String, InstitutionRole>? roles,
   }) async {
     try {
-      // Get current user document
-      final currentUser = await getUserById(userId);
-      final emailKey = currentUser.email; // Document ID is email
-
-      // Build update data
-      final updateData = <String, dynamic>{
-        'updatedAt': FieldValue.serverTimestamp(),
-      };
-
-      if (name != null) {
-        updateData['name'] = name;
-      }
-
-      if (isSuperAdmin != null) {
-        updateData['isSuperAdmin'] = isSuperAdmin;
-      }
-
+      // Convert roles to JSON format for Cloud Function
+      Map<String, dynamic>? rolesJson;
       if (roles != null) {
-        final rolesJson = <String, dynamic>{};
+        rolesJson = <String, dynamic>{};
         for (final entry in roles.entries) {
           rolesJson[entry.key] = InstitutionRoleModel.fromEntity(
             entry.value,
           ).toJson();
         }
-        updateData['roles'] = rolesJson;
       }
 
-      // If email changed, create new document and delete old one
-      if (email != null && email != currentUser.email) {
-        // For email updates, we need to create a new document with the new email
-        // and delete the old one, since email is the document ID
-        final newUserData = {
-          'uid': currentUser.uid,
-          'email': email,
-          'name': name ?? currentUser.name,
-          'isSuperAdmin': isSuperAdmin ?? currentUser.isSuperAdmin,
-          'roles': updateData['roles'] ?? _rolesToJson(currentUser.roles),
-          'currentInstitutionId': currentUser.currentInstitutionId,
-          'createdAt': currentUser.createdAt.toIso8601String(),
-          'updatedAt': DateTime.now().toIso8601String(),
-        };
+      // Call Cloud Function to update user using Admin SDK
+      final callable = cloudFunctions.httpsCallable('updateUser');
+      final result = await callable.call({
+        'userId': userId,
+        if (name != null) 'name': name,
+        if (isSuperAdmin != null) 'isSuperAdmin': isSuperAdmin,
+        if (rolesJson != null) 'roles': rolesJson,
+      });
 
-        // Create new document with new email
-        await firestore
-            .collection(AppConstants.usersCollection)
-            .doc(email)
-            .set(newUserData);
-
-        // Delete old document
-        await firestore
-            .collection(AppConstants.usersCollection)
-            .doc(emailKey)
-            .delete();
-      } else {
-        // Update Firestore document if email hasn't changed
-        await firestore
-            .collection(AppConstants.usersCollection)
-            .doc(emailKey)
-            .update(updateData);
+      // Check if the cloud function returned an error
+      // Convert from Map<Object?, Object?> to Map<String, dynamic> recursively
+      if (result.data == null) {
+        throw const AuthException(
+          message: 'Failed to update user: No response from server',
+        );
       }
 
-      // Fetch and return updated user
-      final updatedEmail = email ?? emailKey;
-      return await getUserById(updatedEmail);
+      // Recursively convert the response data to handle nested maps
+      final responseData =
+          convertMapRecursively(result.data) as Map<String, dynamic>;
+
+      if (responseData['success'] == false || responseData['success'] == null) {
+        final errorMessage =
+            responseData['error'] as String? ?? 'Failed to update user';
+        throw AuthException(message: errorMessage);
+      }
+
+      // Extract user data from response (already converted recursively)
+      final userData = responseData['user'] as Map<String, dynamic>?;
+      if (userData == null) {
+        throw const AuthException(
+          message: 'Failed to update user: No user data returned',
+        );
+      }
+
+      // Return updated user as UserModel
+      return UserModel.fromJson(userData);
+    } on FirebaseFunctionsException catch (e) {
+      // Handle specific function error codes
+      switch (e.code) {
+        case 'permission-denied':
+          throw AuthException(
+            message: 'Permission denied: Only super admins can update users',
+          );
+        case 'unauthenticated':
+          throw AuthException(message: 'Authentication required');
+        case 'not-found':
+          throw AuthException(message: 'User not found');
+        case 'invalid-argument':
+          throw AuthException(
+            message: e.message ?? 'Invalid arguments provided',
+          );
+        default:
+          throw ServerException(
+            message: 'Failed to update user: ${e.message ?? e.code}',
+          );
+      }
     } on FirebaseException catch (e) {
       throw ServerException(message: 'Firebase error: ${e.message}');
     } on AuthException {
       rethrow;
+    } catch (e) {
+      throw ServerException(
+        message: 'Unexpected error updating user: ${e.toString()}',
+      );
     }
-  }
-
-  Map<String, dynamic> _rolesToJson(Map<String, InstitutionRole> roles) {
-    final rolesJson = <String, dynamic>{};
-    for (final entry in roles.entries) {
-      rolesJson[entry.key] = InstitutionRoleModel.fromEntity(
-        entry.value,
-      ).toJson();
-    }
-    return rolesJson;
   }
 
   @override
   Future<void> deleteUser(String userId) async {
     try {
-      // Get user to find email (document ID)
-      final user = await getUserById(userId);
-      final email = user.email;
+      // Call cloud function to delete user using Admin SDK
+      final callable = cloudFunctions.httpsCallable('deleteUser');
+      final result = await callable.call({'userId': userId});
 
-      // Get Firebase Auth user by UID
-      final firebaseUser = await firebaseAuth.currentUser;
-
-      // Delete Firebase Auth account
-      // Note: In production, you'd want to use Admin SDK to delete any user
-      // For now, this only works if the current user is deleting themselves
-      // For admin deleting other users, you'd need Cloud Functions
-      if (firebaseUser?.uid == user.uid) {
-        await firebaseUser!.delete();
-      } else {
-        // If not current user, we can't delete via client SDK
-        // This should be handled via Cloud Function with Admin SDK
-        // For now, we'll throw an error
-        throw const AuthException(
-          message:
-              'Cannot delete other users via client SDK. Use Cloud Function.',
-        );
+      // Check if the cloud function returned an error
+      final responseData = result.data as Map<String, dynamic>?;
+      if (responseData != null && responseData['success'] == false) {
+        final errorMessage =
+            responseData['error'] as String? ?? 'Failed to delete user';
+        throw AuthException(message: errorMessage);
       }
-
-      // Delete Firestore document
-      await firestore
-          .collection(AppConstants.usersCollection)
-          .doc(email)
-          .delete();
+    } on FirebaseFunctionsException catch (e) {
+      // Handle specific function error codes
+      throw ServerException(
+        message: 'Failed to delete user: ${e.message ?? e.code}',
+      );
     } on FirebaseException catch (e) {
       throw ServerException(message: 'Firebase error: ${e.message}');
     } on AuthException {
       rethrow;
+    } catch (e) {
+      throw ServerException(
+        message: 'Unexpected error deleting user: ${e.toString()}',
+      );
     }
   }
 

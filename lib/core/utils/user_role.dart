@@ -19,7 +19,7 @@ enum UserRole {
         return UserRole.teacher;
       case 'student':
         return UserRole.student;
-      case 'class_representative':
+      case 'class_rep':
         return UserRole.classRepresentative;
       case 'stakeholder':
         return UserRole.stakeholder;
@@ -40,7 +40,7 @@ enum UserRole {
       case UserRole.student:
         return 'student';
       case UserRole.classRepresentative:
-        return 'class_representative';
+        return 'class_rep';
       case UserRole.stakeholder:
         return 'stakeholder';
     }

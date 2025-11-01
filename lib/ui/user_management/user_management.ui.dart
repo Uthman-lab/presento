@@ -12,4 +12,7 @@ part 'screens/create_user_screen.dart';
 part 'widgets/user_list_tile.dart';
 part 'widgets/user_role_chip.dart';
 part 'widgets/institution_role_editor.dart';
+part 'widgets/role_filter_dropdown.dart';
+part 'widgets/status_filter_dropdown.dart';
+part 'widgets/sort_dropdown.dart';
 

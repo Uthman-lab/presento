@@ -8,7 +8,11 @@ service cloud.firestore {
     }
     
     function getUserData() {
-      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data;
+      return get(/databases/$(database)/documents/users/$(request.auth.token.email)).data;
+    }
+    
+    function getUserDataById(userId) {
+      return get(/databases/$(database)/documents/users/$(userId)).data;
     }
     
     function isSuperAdmin() {
@@ -51,40 +55,26 @@ service cloud.firestore {
       );
     }
     
-    function canManageUser(targetUserId) {
-      return isAuthenticated() && (
-        isSuperAdmin() || (
-          // Institution admin can manage users with roles in their institution
-          targetUserId in resource.data.roles 
-          && resource.data.roles[targetUserId].isActive == true
-          && isInstitutionAdmin(targetUserId)
-        )
-      );
+    function hasSharedInstitutionAccess(targetUserId) {
+      let targetUserData = getUserDataById(targetUserId);
+      return targetUserData.roles.keys().hasAny(getUserData().roles.keys()) &&
+             targetUserData.roles[getUserData().roles.keys()[0]].isActive == true;
     }
     
-    function canReadUser(targetUserId) {
-      return isAuthenticated() && (
-        isSuperAdmin() || 
-        request.auth.uid == targetUserId ||
-        // Institution admin can read users with roles in their institution
-        (targetUserId in resource.data.roles 
-          && resource.data.roles[targetUserId].isActive == true
-          && getUserData().roles.keys().hasAny([resource.data.roles.keys()]))
-      );
+    function canUpdateInstitutionAdmin(targetUserId) {
+      let targetUserRoles = getUserDataById(targetUserId).roles;
+      let adminRoles = getUserData().roles;
+      return targetUserRoles.keys().hasAny(adminRoles.keys()) &&
+             !targetUserRoles['isSuperAdmin'];
     }
     
     // Users collection
     match /users/{userId} {
       // Read: own profile, super admin, or institution admin for users in their institution
       allow read: if isAuthenticated() && (
-        request.auth.uid == get(/databases/$(database)/documents/users/$(userId)).data.uid ||
+        request.auth.token.email == userId ||
         isSuperAdmin() ||
-        // Institution admins can read users with roles in their institutions
-        (
-          let userData = get(/databases/$(database)/documents/users/$(userId)).data;
-          userData.roles.keys().hasAny(getUserData().roles.keys()) &&
-          userData.roles[getUserData().roles.keys()[0]].isActive == true
-        )
+        hasSharedInstitutionAccess(userId)
       );
       
       // Create: super admin only
@@ -93,23 +83,15 @@ service cloud.firestore {
       // Update: own profile (limited), super admin (full), or institution admin (limited)
       allow update: if isAuthenticated() && (
         // Own profile - can update name but not isSuperAdmin or roles
-        (request.auth.uid == get(/databases/$(database)/documents/users/$(userId)).data.uid &&
+        (request.auth.token.email == userId &&
           request.resource.data.roles == resource.data.roles &&
           request.resource.data.isSuperAdmin == resource.data.isSuperAdmin) ||
         // Super admin - full access
         (isSuperAdmin()) ||
         // Institution admin - can update roles for their institution only
-        (
-          // Check if user has roles in admin's institutions
-          let userRoles = resource.data.roles;
-          let adminRoles = getUserData().roles;
-          // Can only update if target user has role in admin's institution
-          userRoles.keys().hasAny(adminRoles.keys()) &&
-          // Cannot change isSuperAdmin
+        (canUpdateInstitutionAdmin(userId) &&
           request.resource.data.isSuperAdmin == resource.data.isSuperAdmin &&
-          // Cannot change super admin status
-          !(resource.data.isSuperAdmin == true)
-        )
+          !resource.data.isSuperAdmin)
       );
       
       // Delete: super admin only (for now - can be enhanced with Cloud Functions)

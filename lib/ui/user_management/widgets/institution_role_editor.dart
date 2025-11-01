@@ -77,7 +77,7 @@ class _InstitutionRoleEditorState extends State<InstitutionRoleEditor> {
                         child: Column(
                           children: [
                             DropdownButtonFormField<String>(
-                              value: currentRole.role,
+                              value: _normalizeRole(currentRole.role),
                               decoration: const InputDecoration(
                                 labelText: 'Role',
                                 border: OutlineInputBorder(),
@@ -151,6 +151,28 @@ class _InstitutionRoleEditorState extends State<InstitutionRoleEditor> {
         return 'Stakeholder';
       default:
         return role;
+    }
+  }
+
+  String _normalizeRole(String? role) {
+    if (role == null || role.isEmpty) {
+      return AppConstants.teacherRole; // Default fallback
+    }
+
+    // Normalize legacy/variant role names to canonical forms
+    switch (role.toLowerCase()) {
+      case 'class_representative':
+      case 'class_rep':
+        return AppConstants.classRepRole;
+      case 'teacher':
+        return AppConstants.teacherRole;
+      case 'student':
+        return AppConstants.studentRole;
+      case 'stakeholder':
+        return AppConstants.stakeholderRole;
+      default:
+        // If role doesn't match, return first valid option as fallback
+        return AppConstants.teacherRole;
     }
   }
 }

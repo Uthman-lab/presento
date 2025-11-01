@@ -15,6 +15,7 @@ export 'package:get_it/get_it.dart';
 export 'package:firebase_auth/firebase_auth.dart' hide User;
 export 'package:cloud_firestore/cloud_firestore.dart' hide kIsWasm, Order;
 export 'package:firebase_core/firebase_core.dart';
+export 'package:cloud_functions/cloud_functions.dart';
 
 // Storage & Network
 export 'package:shared_preferences/shared_preferences.dart';

@@ -52,12 +52,14 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
 
   void _saveChanges() {
     if (_formKey.currentState!.validate()) {
-      final currentUser = context.select<AuthBloc, User?>((bloc) {
-        final state = bloc.state;
-        if (state is Authenticated) return state.user;
-        if (state is AllInstitutionsLoaded) return state.user;
-        return null;
-      });
+      final authBloc = context.read<AuthBloc>();
+      final currentState = authBloc.state;
+      User? currentUser;
+      if (currentState is Authenticated) {
+        currentUser = currentState.user;
+      } else if (currentState is AllInstitutionsLoaded) {
+        currentUser = currentState.user;
+      }
 
       // Check permissions
       if (currentUser?.isSuperAdmin != true) {
@@ -74,7 +76,6 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
         UpdateUser(
           userId: widget.userId,
           name: _nameController?.text.trim(),
-          email: _emailController?.text.trim(),
           isSuperAdmin: _isSuperAdmin,
           roles: _roles,
         ),
@@ -101,7 +102,6 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             onPressed: () {
               Navigator.pop(dialogContext);
               bloc.add(DeleteUser(userId: widget.userId));
-              context.pop();
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
@@ -162,6 +162,9 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
             );
             if (state.user != null) {
               _initializeControllers(state.user!);
+            } else {
+              // If user is null, it's a delete operation - navigate back
+              Future.microtask(() => context.pop());
             }
           } else if (state is UserManagementError) {
             ScaffoldMessenger.of(context).showSnackBar(
@@ -303,7 +306,8 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                             border: OutlineInputBorder(),
                             prefixIcon: Icon(Icons.email),
                           ),
-                          enabled: _isEditing,
+                          enabled:
+                              false, // Always disabled - emails are immutable
                           validator: (value) {
                             if (value == null || value.trim().isEmpty) {
                               return 'Email is required';

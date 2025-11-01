@@ -41,7 +41,6 @@ abstract class AuthRepository {
   Future<Either<Failure, User>> updateUser({
     required String userId,
     String? name,
-    String? email,
     bool? isSuperAdmin,
     Map<String, InstitutionRole>? roles,
   });

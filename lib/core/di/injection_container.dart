@@ -10,6 +10,7 @@ Future<void> init() async {
   final sharedPreferences = await SharedPreferences.getInstance();
   sl.registerLazySingleton(() => sharedPreferences);
   sl.registerLazySingleton(() => Connectivity());
+  sl.registerLazySingleton(() => FirebaseFunctions.instance);
 
   // Core
   sl.registerLazySingleton<NetworkInfo>(
@@ -24,6 +25,7 @@ Future<void> init() async {
     () => AuthRemoteDataSourceImpl(
       firebaseAuth: FirebaseAuth.instance,
       firestore: FirebaseFirestore.instance,
+      cloudFunctions: sl(),
     ),
   );
 
@@ -63,7 +65,7 @@ Future<void> init() async {
       selectInstitutionUseCase: sl(),
     ),
   );
-  
+
   sl.registerFactory(
     () => UserManagementBloc(
       getAllUsersUseCase: sl(),

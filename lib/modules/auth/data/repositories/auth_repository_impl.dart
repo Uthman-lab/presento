@@ -158,7 +158,6 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   Future<Either<Failure, User>> updateUser({
     required String userId,
     String? name,
-    String? email,
     bool? isSuperAdmin,
     Map<String, InstitutionRole>? roles,
   }) async {
@@ -166,7 +165,6 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
       return await remoteDataSource.updateUser(
         userId: userId,
         name: name,
-        email: email,
         isSuperAdmin: isSuperAdmin,
         roles: roles,
       );

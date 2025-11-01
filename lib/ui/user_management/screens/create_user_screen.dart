@@ -107,7 +107,9 @@ class _CreateUserScreenState extends State<CreateUserScreen> {
                 backgroundColor: Colors.green,
               ),
             );
-            context.pop();
+            // Pop and return true to indicate successful creation
+            // This will trigger refresh in the UserManagementScreen
+            context.pop(true);
           } else if (state is UserManagementError) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(
