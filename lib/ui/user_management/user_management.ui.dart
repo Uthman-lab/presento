@@ -2,6 +2,9 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:presento/imports.dart';
 import 'package:presento/core/core.dart';
 import 'package:presento/modules/auth/auth.dart';
+import 'package:presento/modules/user/domain/domain.dart';
+
+import '../../modules/institution/domain/domain.dart';
 
 part 'bloc/user_management_bloc.dart';
 part 'bloc/user_management_event.dart';

@@ -16,3 +16,4 @@ class InstitutionRole extends Equatable {
   @override
   List<Object?> get props => [role, assignedClassId, isActive, joinedAt];
 }
+

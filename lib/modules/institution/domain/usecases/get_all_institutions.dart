@@ -1,7 +1,7 @@
 part of '../domain.dart';
 
 class GetAllInstitutionsUseCase {
-  final AuthRepository repository;
+  final InstitutionRepository repository;
 
   GetAllInstitutionsUseCase({required this.repository});
 

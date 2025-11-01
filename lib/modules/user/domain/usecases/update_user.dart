@@ -1,7 +1,7 @@
 part of '../domain.dart';
 
 class UpdateUserUseCase {
-  final AuthRepository repository;
+  final UserRepository repository;
 
   UpdateUserUseCase({required this.repository});
 

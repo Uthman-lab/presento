@@ -1,6 +1,5 @@
 part of '../domain.dart';
 
-
 class Institution extends Equatable {
   final String id;
   final String name;
@@ -17,9 +16,4 @@ class Institution extends Equatable {
   @override
   List<Object> get props => [id, name, createdAt, updatedAt];
 }
-
-
-
-
-
 

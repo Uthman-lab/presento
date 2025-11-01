@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:presento/imports.dart';
-import 'package:presento/modules/auth/auth.dart';
+import '../../../modules/institution/domain/domain.dart';
 
 class SuperAdminInstitutionSelector extends StatelessWidget {
   final List<Institution> institutions;

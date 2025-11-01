@@ -1,7 +1,7 @@
 part of '../domain.dart';
 
 class GetAllUsersUseCase {
-  final AuthRepository repository;
+  final UserRepository repository;
 
   GetAllUsersUseCase({required this.repository});
 

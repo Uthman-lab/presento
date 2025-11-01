@@ -7,6 +7,8 @@ import 'package:presento/ui/dashboard/widgets/super_admin_institution_selector.d
 import 'package:presento/ui/user_management/user_management.ui.dart';
 import 'package:presento/core/di/injection_container.dart' as di;
 
+import '../../../modules/institution/domain/domain.dart';
+
 class SuperAdminDashboard extends StatefulWidget {
   const SuperAdminDashboard({super.key});
 

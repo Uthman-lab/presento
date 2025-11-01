@@ -1,7 +1,7 @@
 part of '../domain.dart';
 
 class SelectInstitutionUseCase {
-  final AuthRepository repository;
+  final InstitutionRepository repository;
 
   SelectInstitutionUseCase({required this.repository});
 
@@ -12,3 +12,4 @@ class SelectInstitutionUseCase {
     return await repository.selectInstitution(userEmail, institutionId);
   }
 }
+

@@ -1,7 +1,7 @@
 part of '../domain.dart';
 
 class DeleteUserUseCase {
-  final AuthRepository repository;
+  final UserRepository repository;
 
   DeleteUserUseCase({required this.repository});
 

@@ -1,7 +1,7 @@
 part of '../domain.dart';
 
 class CreateUserUseCase {
-  final AuthRepository repository;
+  final UserRepository repository;
 
   CreateUserUseCase({required this.repository});
 

@@ -1,7 +1,7 @@
 part of '../domain.dart';
 
 class GetInstitutionsUseCase {
-  final AuthRepository repository;
+  final InstitutionRepository repository;
 
   GetInstitutionsUseCase({required this.repository});
 
@@ -11,5 +11,4 @@ class GetInstitutionsUseCase {
     return await repository.getInstitutions(institutionIds);
   }
 }
-
 

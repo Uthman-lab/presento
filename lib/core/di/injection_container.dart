@@ -1,6 +1,8 @@
 import 'package:presento/imports.dart';
 import 'package:presento/core/core.dart';
 import 'package:presento/modules/auth/auth.dart';
+import 'package:presento/modules/user/user.dart';
+import 'package:presento/modules/institution/institution.dart';
 import 'package:presento/ui/user_management/user_management.ui.dart';
 
 final sl = GetIt.instance;
@@ -17,7 +19,7 @@ Future<void> init() async {
     () => NetworkInfoImpl(connectivity: sl()),
   );
 
-  // Data sources
+  // Auth Data sources
   sl.registerLazySingleton<AuthLocalDataSource>(
     () => AuthLocalDataSourceImpl(sharedPreferences: sl()),
   );
@@ -29,7 +31,21 @@ Future<void> init() async {
     ),
   );
 
-  // Repository
+  // Institution Data sources
+  sl.registerLazySingleton<InstitutionRemoteDataSource>(
+    () =>
+        InstitutionRemoteDataSourceImpl(firestore: FirebaseFirestore.instance),
+  );
+
+  // User Data sources
+  sl.registerLazySingleton<UserRemoteDataSource>(
+    () => UserRemoteDataSourceImpl(
+      firestore: FirebaseFirestore.instance,
+      cloudFunctions: sl(),
+    ),
+  );
+
+  // Repositories
   sl.registerLazySingleton<AuthRepository>(
     () => AuthRepositoryImpl(
       remoteDataSource: sl(),
@@ -38,14 +54,26 @@ Future<void> init() async {
     ),
   );
 
-  // Use cases
+  sl.registerLazySingleton<InstitutionRepository>(
+    () => InstitutionRepositoryImpl(remoteDataSource: sl(), networkInfo: sl()),
+  );
+
+  sl.registerLazySingleton<UserRepository>(
+    () => UserRepositoryImpl(remoteDataSource: sl(), networkInfo: sl()),
+  );
+
+  // Auth Use cases
   sl.registerLazySingleton(() => LoginUseCase(repository: sl()));
   sl.registerLazySingleton(() => LogoutUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetCurrentUserUseCase(repository: sl()));
   sl.registerLazySingleton(() => ResetPasswordUseCase(repository: sl()));
+
+  // Institution Use cases
   sl.registerLazySingleton(() => GetInstitutionsUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetAllInstitutionsUseCase(repository: sl()));
   sl.registerLazySingleton(() => SelectInstitutionUseCase(repository: sl()));
+
+  // User Use cases
   sl.registerLazySingleton(() => GetAllUsersUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetUserByIdUseCase(repository: sl()));
   sl.registerLazySingleton(() => CreateUserUseCase(repository: sl()));
