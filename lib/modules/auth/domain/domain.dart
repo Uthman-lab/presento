@@ -1,5 +1,4 @@
 import 'package:presento/imports.dart';
-import 'package:presento/core/core.dart';
 
 part 'entities/institution.dart';
 part 'entities/institution_role.dart';

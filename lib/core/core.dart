@@ -18,3 +18,4 @@ part 'utils/extensions.dart';
 part 'utils/user_role.dart';
 part 'repositories/base_repository.dart';
 part 'repositories/repositories.dart';
+part 'datasources/firebase_base_data_source.dart';

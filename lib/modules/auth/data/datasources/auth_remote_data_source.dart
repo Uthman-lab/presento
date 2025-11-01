@@ -38,12 +38,13 @@ abstract class AuthRemoteDataSource {
   Future<void> deleteUser(String userId);
 }
 
-class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
+class AuthRemoteDataSourceImpl extends FirebaseBaseDataSource
+    implements AuthRemoteDataSource {
   final FirebaseAuth firebaseAuth;
   final FirebaseFirestore firestore;
   final FirebaseFunctions cloudFunctions;
 
-  const AuthRemoteDataSourceImpl({
+  AuthRemoteDataSourceImpl({
     required this.firebaseAuth,
     required this.firestore,
     required this.cloudFunctions,
@@ -54,7 +55,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     required String email,
     required String password,
   }) async {
-    try {
+    return executeFirebaseOperation(() async {
       final credential = await firebaseAuth.signInWithEmailAndPassword(
         email: email,
         password: password,
@@ -78,28 +79,22 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       userData['uid'] = credential.user!.uid;
 
       return UserModel.fromJson(userData);
-    } on FirebaseAuthException catch (e) {
-      throw _handleFirebaseAuthException(e);
-    } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firebase error: ${e.message}');
-    }
+    });
   }
 
   @override
   Future<void> logout() async {
-    try {
+    return executeFirebaseOperation(() async {
       await firebaseAuth.signOut();
-    } on FirebaseAuthException catch (e) {
-      throw _handleFirebaseAuthException(e);
-    }
+    });
   }
 
   @override
   Future<UserModel?> getCurrentUser() async {
-    try {
-      final firebaseUser = firebaseAuth.currentUser;
-      if (firebaseUser == null) return null;
+    final firebaseUser = firebaseAuth.currentUser;
+    if (firebaseUser == null) return null;
 
+    return executeFirebaseOperation(() async {
       // Fetch user document from Firestore
       final userDoc = await firestore
           .collection(AppConstants.usersCollection)
@@ -112,25 +107,21 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       userData['uid'] = firebaseUser.uid;
 
       return UserModel.fromJson(userData);
-    } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firebase error: ${e.message}');
-    }
+    });
   }
 
   @override
   Future<void> resetPassword({required String email}) async {
-    try {
+    return executeFirebaseOperation(() async {
       await firebaseAuth.sendPasswordResetEmail(email: email);
-    } on FirebaseAuthException catch (e) {
-      throw _handleFirebaseAuthException(e);
-    }
+    });
   }
 
   @override
   Future<List<InstitutionModel>> getInstitutions(
     List<String> institutionIds,
   ) async {
-    try {
+    return executeFirebaseOperation(() async {
       final institutions = <InstitutionModel>[];
 
       for (final institutionId in institutionIds) {
@@ -147,14 +138,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       return institutions;
-    } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firebase error: ${e.message}');
-    }
+    });
   }
 
   @override
   Future<List<InstitutionModel>> getAllInstitutions() async {
-    try {
+    return executeFirebaseOperation(() async {
       final querySnapshot = await firestore
           .collection(AppConstants.institutionsCollection)
           .get();
@@ -168,9 +157,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       return institutions;
-    } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firebase error: ${e.message}');
-    }
+    });
   }
 
   @override
@@ -178,7 +165,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     String userEmail,
     String? institutionId,
   ) async {
-    try {
+    return executeFirebaseOperation(() async {
       final updateData = <String, dynamic>{
         'updatedAt': FieldValue.serverTimestamp(),
       };
@@ -194,14 +181,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
           .collection(AppConstants.usersCollection)
           .doc(userEmail)
           .update(updateData);
-    } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firebase error: ${e.message}');
-    }
+    });
   }
 
   @override
   Future<List<UserModel>> getAllUsers({String? institutionId}) async {
-    try {
+    return executeFirebaseOperation(() async {
       QuerySnapshot querySnapshot;
 
       if (institutionId != null && institutionId.isNotEmpty) {
@@ -237,14 +222,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       }
 
       return users;
-    } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firebase error: ${e.message}');
-    }
+    });
   }
 
   @override
   Future<UserModel> getUserById(String userId) async {
-    try {
+    return executeFirebaseOperation(() async {
       // Get by email (document ID is email)
       final userDoc = await firestore
           .collection(AppConstants.usersCollection)
@@ -260,13 +243,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       userData['uid'] = userDoc.id;
 
       return UserModel.fromJson(userData);
-    } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firebase error: ${e.message}');
-    } on AuthException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(message: 'Error fetching user: $e');
-    }
+    });
   }
 
   @override
@@ -277,7 +254,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     bool isSuperAdmin = false,
     Map<String, InstitutionRole> roles = const {},
   }) async {
-    try {
+    return executeFirebaseOperation(() async {
       // Convert roles to JSON format for Cloud Function
       final rolesJson = <String, dynamic>{};
       for (final entry in roles.entries) {
@@ -325,35 +302,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       // Return created user as UserModel
       return UserModel.fromJson(userData);
-    } on FirebaseFunctionsException catch (e) {
-      // Handle specific function error codes
-      switch (e.code) {
-        case 'permission-denied':
-          throw AuthException(
-            message: 'Permission denied: Only super admins can create users',
-          );
-        case 'already-exists':
-          throw AuthException(message: 'User with this email already exists');
-        case 'invalid-argument':
-          throw AuthException(
-            message: e.message ?? 'Invalid arguments provided',
-          );
-        case 'unauthenticated':
-          throw AuthException(message: 'Authentication required');
-        default:
-          throw ServerException(
-            message: 'Failed to create user: ${e.message ?? e.code}',
-          );
-      }
-    } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firebase error: ${e.message}');
-    } on AuthException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(
-        message: 'Unexpected error creating user: ${e.toString()}',
-      );
-    }
+    });
   }
 
   @override
@@ -363,7 +312,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
     bool? isSuperAdmin,
     Map<String, InstitutionRole>? roles,
   }) async {
-    try {
+    return executeFirebaseOperation(() async {
       // Convert roles to JSON format for Cloud Function
       Map<String, dynamic>? rolesJson;
       if (roles != null) {
@@ -412,40 +361,12 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
 
       // Return updated user as UserModel
       return UserModel.fromJson(userData);
-    } on FirebaseFunctionsException catch (e) {
-      // Handle specific function error codes
-      switch (e.code) {
-        case 'permission-denied':
-          throw AuthException(
-            message: 'Permission denied: Only super admins can update users',
-          );
-        case 'unauthenticated':
-          throw AuthException(message: 'Authentication required');
-        case 'not-found':
-          throw AuthException(message: 'User not found');
-        case 'invalid-argument':
-          throw AuthException(
-            message: e.message ?? 'Invalid arguments provided',
-          );
-        default:
-          throw ServerException(
-            message: 'Failed to update user: ${e.message ?? e.code}',
-          );
-      }
-    } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firebase error: ${e.message}');
-    } on AuthException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(
-        message: 'Unexpected error updating user: ${e.toString()}',
-      );
-    }
+    });
   }
 
   @override
   Future<void> deleteUser(String userId) async {
-    try {
+    return executeFirebaseOperation(() async {
       // Call cloud function to delete user using Admin SDK
       final callable = cloudFunctions.httpsCallable('deleteUser');
       final result = await callable.call({'userId': userId});
@@ -457,42 +378,6 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
             responseData['error'] as String? ?? 'Failed to delete user';
         throw AuthException(message: errorMessage);
       }
-    } on FirebaseFunctionsException catch (e) {
-      // Handle specific function error codes
-      throw ServerException(
-        message: 'Failed to delete user: ${e.message ?? e.code}',
-      );
-    } on FirebaseException catch (e) {
-      throw ServerException(message: 'Firebase error: ${e.message}');
-    } on AuthException {
-      rethrow;
-    } catch (e) {
-      throw ServerException(
-        message: 'Unexpected error deleting user: ${e.toString()}',
-      );
-    }
-  }
-
-  AuthException _handleFirebaseAuthException(FirebaseAuthException e) {
-    switch (e.code) {
-      case 'user-not-found':
-        return const AuthException(message: 'No user found with this email');
-      case 'wrong-password':
-        return const AuthException(message: 'Incorrect password');
-      case 'invalid-email':
-        return const AuthException(message: 'Invalid email address');
-      case 'user-disabled':
-        return const AuthException(message: 'This account has been disabled');
-      case 'too-many-requests':
-        return const AuthException(
-          message: 'Too many failed attempts. Please try again later',
-        );
-      case 'network-request-failed':
-        return const AuthException(
-          message: 'Network error. Please check your connection',
-        );
-      default:
-        return AuthException(message: 'Authentication failed: ${e.message}');
-    }
+    });
   }
 }

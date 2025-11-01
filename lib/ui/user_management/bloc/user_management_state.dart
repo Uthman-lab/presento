@@ -88,17 +88,17 @@ class UserFilters extends Equatable {
     Object? showSuperAdminOnly = const _Unset(),
   }) {
     return UserFilters(
-      selectedRoles: selectedRoles is _Unset 
-          ? this.selectedRoles 
+      selectedRoles: selectedRoles is _Unset
+          ? this.selectedRoles
           : selectedRoles as Set<UserRole>?,
-      showActiveOnly: showActiveOnly is _Unset 
-          ? this.showActiveOnly 
+      showActiveOnly: showActiveOnly is _Unset
+          ? this.showActiveOnly
           : showActiveOnly as bool?,
-      showInactiveOnly: showInactiveOnly is _Unset 
-          ? this.showInactiveOnly 
+      showInactiveOnly: showInactiveOnly is _Unset
+          ? this.showInactiveOnly
           : showInactiveOnly as bool?,
-      showSuperAdminOnly: showSuperAdminOnly is _Unset 
-          ? this.showSuperAdminOnly 
+      showSuperAdminOnly: showSuperAdminOnly is _Unset
+          ? this.showSuperAdminOnly
           : showSuperAdminOnly as bool?,
     );
   }
@@ -109,11 +109,11 @@ class UserFilters extends Equatable {
 
   @override
   List<Object?> get props => [
-        selectedRoles,
-        showActiveOnly,
-        showInactiveOnly,
-        showSuperAdminOnly,
-      ];
+    selectedRoles,
+    showActiveOnly,
+    showInactiveOnly,
+    showSuperAdminOnly,
+  ];
 }
 
 class UsersLoaded extends UserManagementState {
@@ -130,12 +130,7 @@ class UsersLoaded extends UserManagementState {
   });
 
   @override
-  List<Object?> get props => [
-        users,
-        searchQuery,
-        activeFilters,
-        sortOption,
-      ];
+  List<Object?> get props => [users, searchQuery, activeFilters, sortOption];
 }
 
 class UserLoaded extends UserManagementState {
@@ -151,10 +146,7 @@ class UserOperationSuccess extends UserManagementState {
   final String message;
   final User? user;
 
-  const UserOperationSuccess({
-    required this.message,
-    this.user,
-  });
+  const UserOperationSuccess({required this.message, this.user});
 
   @override
   List<Object?> get props => [message, user];
@@ -168,4 +160,3 @@ class UserManagementError extends UserManagementState {
   @override
   List<Object> get props => [message];
 }
-
