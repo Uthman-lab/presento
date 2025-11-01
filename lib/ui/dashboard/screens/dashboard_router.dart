@@ -40,7 +40,7 @@ class DashboardRouter extends StatelessWidget {
 
         if (user != null) {
           final roleEnum = user.currentRoleEnum;
-          
+
           // If roleEnum is null, show fallback with error message
           if (roleEnum == null) {
             return Scaffold(
@@ -49,7 +49,11 @@ class DashboardRouter extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    const Icon(Icons.error_outline, size: 64, color: Colors.red),
+                    const Icon(
+                      Icons.error_outline,
+                      size: 64,
+                      color: Colors.red,
+                    ),
                     const SizedBox(height: 16),
                     Text(
                       'Unable to determine user role',
@@ -79,10 +83,9 @@ class DashboardRouter extends StatelessWidget {
             UserRole.classRepresentative =>
               const ClassRepresentativeDashboard(),
             UserRole.stakeholder => const StakeholderDashboard(),
-            _ => const DashboardScreen(),
           };
         }
-        
+
         // Fallback for unhandled states or if user is null
         return const DashboardScreen();
       },

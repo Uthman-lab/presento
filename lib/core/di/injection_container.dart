@@ -1,6 +1,7 @@
 import 'package:presento/imports.dart';
 import 'package:presento/core/core.dart';
 import 'package:presento/modules/auth/auth.dart';
+import 'package:presento/ui/user_management/user_management.ui.dart';
 
 final sl = GetIt.instance;
 
@@ -43,6 +44,12 @@ Future<void> init() async {
   sl.registerLazySingleton(() => GetInstitutionsUseCase(repository: sl()));
   sl.registerLazySingleton(() => GetAllInstitutionsUseCase(repository: sl()));
   sl.registerLazySingleton(() => SelectInstitutionUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetAllUsersUseCase(repository: sl()));
+  sl.registerLazySingleton(() => GetUserByIdUseCase(repository: sl()));
+  sl.registerLazySingleton(() => CreateUserUseCase(repository: sl()));
+  sl.registerLazySingleton(() => UpdateUserUseCase(repository: sl()));
+  sl.registerLazySingleton(() => DeleteUserUseCase(repository: sl()));
+  sl.registerLazySingleton(() => UpdateUserRolesUseCase(repository: sl()));
 
   // BLoC
   sl.registerFactory(
@@ -54,6 +61,16 @@ Future<void> init() async {
       getInstitutionsUseCase: sl(),
       getAllInstitutionsUseCase: sl(),
       selectInstitutionUseCase: sl(),
+    ),
+  );
+  
+  sl.registerFactory(
+    () => UserManagementBloc(
+      getAllUsersUseCase: sl(),
+      getUserByIdUseCase: sl(),
+      createUserUseCase: sl(),
+      updateUserUseCase: sl(),
+      deleteUserUseCase: sl(),
     ),
   );
 }

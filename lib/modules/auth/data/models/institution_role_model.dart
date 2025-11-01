@@ -17,6 +17,15 @@ class InstitutionRoleModel extends InstitutionRole {
     );
   }
 
+  factory InstitutionRoleModel.fromEntity(InstitutionRole role) {
+    return InstitutionRoleModel(
+      role: role.role,
+      assignedClassId: role.assignedClassId,
+      isActive: role.isActive,
+      joinedAt: role.joinedAt,
+    );
+  }
+
   Map<String, dynamic> toJson() {
     return {
       'role': role,

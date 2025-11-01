@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:presento/imports.dart';
 import 'package:presento/ui/auth/auth.ui.dart';
 import 'package:presento/ui/dashboard/widgets/dashboard_widgets.dart';
+import 'package:presento/ui/user_management/user_management.ui.dart';
+import 'package:presento/core/di/injection_container.dart' as di;
 
 class InstitutionAdminDashboard extends StatelessWidget {
   const InstitutionAdminDashboard({super.key});
@@ -160,7 +162,28 @@ class InstitutionAdminDashboard extends StatelessWidget {
                       icon: Icons.people,
                       title: 'User Management',
                       subtitle: 'Manage institution users and assign roles',
-                      onTap: () => _showComingSoon(context),
+                      onTap: () {
+                        final authBloc = context.read<AuthBloc>();
+                        final state = authBloc.state;
+                        String? institutionId;
+                        
+                        if (state is AllInstitutionsLoaded || state is Authenticated) {
+                          final user = state is AllInstitutionsLoaded 
+                              ? state.user 
+                              : (state as Authenticated).user;
+                          institutionId = user.currentInstitutionId;
+                        }
+                        
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BlocProvider(
+                              create: (context) => di.sl<UserManagementBloc>(),
+                              child: UserManagementScreen(institutionId: institutionId),
+                            ),
+                          ),
+                        );
+                      },
                       iconColor: Colors.orange,
                     ),
                     DashboardCard(

@@ -24,4 +24,27 @@ abstract class AuthRepository {
     String userEmail,
     String? institutionId,
   );
+
+  // User Management Methods
+  Future<Either<Failure, List<User>>> getAllUsers({String? institutionId});
+
+  Future<Either<Failure, User>> getUserById(String userId);
+
+  Future<Either<Failure, User>> createUser({
+    required String email,
+    required String password,
+    required String name,
+    bool isSuperAdmin = false,
+    Map<String, InstitutionRole> roles = const {},
+  });
+
+  Future<Either<Failure, User>> updateUser({
+    required String userId,
+    String? name,
+    String? email,
+    bool? isSuperAdmin,
+    Map<String, InstitutionRole>? roles,
+  });
+
+  Future<Either<Failure, void>> deleteUser(String userId);
 }

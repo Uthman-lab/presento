@@ -3,6 +3,8 @@ import 'package:firebase_auth/firebase_auth.dart' as firebase_auth;
 import 'package:presento/modules/auth/domain/domain.dart';
 import 'package:presento/ui/auth/auth.ui.dart';
 import 'package:presento/ui/dashboard/screens/dashboard_router.dart';
+import 'package:presento/ui/user_management/user_management.ui.dart';
+import 'package:presento/core/di/injection_container.dart' as di;
 
 part 'error/exceptions.dart';
 part 'error/failures.dart';

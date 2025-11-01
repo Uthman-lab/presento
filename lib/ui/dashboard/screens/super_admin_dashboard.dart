@@ -4,6 +4,8 @@ import 'package:presento/modules/auth/auth.dart';
 import 'package:presento/ui/auth/auth.ui.dart';
 import 'package:presento/ui/dashboard/widgets/dashboard_widgets.dart';
 import 'package:presento/ui/dashboard/widgets/super_admin_institution_selector.dart';
+import 'package:presento/ui/user_management/user_management.ui.dart';
+import 'package:presento/core/di/injection_container.dart' as di;
 
 class SuperAdminDashboard extends StatefulWidget {
   const SuperAdminDashboard({super.key});
@@ -119,7 +121,17 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
                     QuickAction(
                       icon: Icons.people,
                       label: 'View All\nUsers',
-                      onTap: () => _showComingSoon(context),
+                      onTap: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => BlocProvider(
+                              create: (context) => di.sl<UserManagementBloc>(),
+                              child: const UserManagementScreen(),
+                            ),
+                          ),
+                        );
+                      },
                     ),
                     if (selectedInstitutionId != null &&
                         selectedInstitutionId.isNotEmpty)
@@ -237,7 +249,18 @@ class _SuperAdminDashboardState extends State<SuperAdminDashboard> {
                           title: 'Global User Management',
                           subtitle:
                               'Manage users across all institutions and roles',
-                          onTap: () => _showComingSoon(context),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => BlocProvider(
+                                  create: (context) =>
+                                      di.sl<UserManagementBloc>(),
+                                  child: const UserManagementScreen(),
+                                ),
+                              ),
+                            );
+                          },
                           iconColor: Colors.green,
                         ),
                         DashboardCard(
