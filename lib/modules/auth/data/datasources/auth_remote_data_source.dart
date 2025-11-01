@@ -11,7 +11,9 @@ abstract class AuthRemoteDataSource {
 
   Future<List<InstitutionModel>> getInstitutions(List<String> institutionIds);
 
-  Future<void> selectInstitution(String userEmail, String institutionId);
+  Future<List<InstitutionModel>> getAllInstitutions();
+
+  Future<void> selectInstitution(String userEmail, String? institutionId);
 }
 
 class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
@@ -127,15 +129,47 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
   }
 
   @override
-  Future<void> selectInstitution(String userEmail, String institutionId) async {
+  Future<List<InstitutionModel>> getAllInstitutions() async {
     try {
+      final querySnapshot = await firestore
+          .collection(AppConstants.institutionsCollection)
+          .get();
+
+      final institutions = <InstitutionModel>[];
+
+      for (final doc in querySnapshot.docs) {
+        final institutionData = doc.data();
+        institutionData['id'] = doc.id;
+        institutions.add(InstitutionModel.fromJson(institutionData));
+      }
+
+      return institutions;
+    } on FirebaseException catch (e) {
+      throw ServerException(message: 'Firebase error: ${e.message}');
+    }
+  }
+
+  @override
+  Future<void> selectInstitution(
+    String userEmail,
+    String? institutionId,
+  ) async {
+    try {
+      final updateData = <String, dynamic>{
+        'updatedAt': FieldValue.serverTimestamp(),
+      };
+
+      // Handle clearing: if null or empty, set to null in Firestore
+      if (institutionId == null || institutionId.isEmpty) {
+        updateData['currentInstitutionId'] = null;
+      } else {
+        updateData['currentInstitutionId'] = institutionId;
+      }
+
       await firestore
           .collection(AppConstants.usersCollection)
           .doc(userEmail)
-          .update({
-            'currentInstitutionId': institutionId,
-            'updatedAt': FieldValue.serverTimestamp(),
-          });
+          .update(updateData);
     } on FirebaseException catch (e) {
       throw ServerException(message: 'Firebase error: ${e.message}');
     }

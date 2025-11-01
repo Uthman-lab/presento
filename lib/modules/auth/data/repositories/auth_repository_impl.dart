@@ -87,14 +87,21 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
   }
 
   @override
+  Future<Either<Failure, List<Institution>>> getAllInstitutions() async {
+    return executeWithErrorHandling(() async {
+      return await remoteDataSource.getAllInstitutions();
+    }, networkInfo: networkInfo);
+  }
+
+  @override
   Future<Either<Failure, void>> selectInstitution(
     String userEmail,
-    String institutionId,
+    String? institutionId,
   ) async {
     return executeWithErrorHandling(() async {
       await remoteDataSource.selectInstitution(userEmail, institutionId);
 
-      // Update cached user with new currentInstitutionId
+      // Update cached user with new currentInstitutionId (null if clearing)
       final cachedUser = await localDataSource.getCachedUser();
       if (cachedUser != null) {
         final updatedUser = UserModel(
@@ -102,7 +109,10 @@ class AuthRepositoryImpl extends BaseRepository implements AuthRepository {
           email: cachedUser.email,
           name: cachedUser.name,
           roles: cachedUser.roles,
-          currentInstitutionId: institutionId,
+          currentInstitutionId: (institutionId == null || institutionId.isEmpty)
+              ? null
+              : institutionId,
+          isSuperAdmin: cachedUser.isSuperAdmin,
           createdAt: cachedUser.createdAt,
           updatedAt: DateTime.now(),
         );

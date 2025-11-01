@@ -46,3 +46,7 @@ class InstitutionSelectionRequested extends AuthEvent {
   @override
   List<Object> get props => [institutionId];
 }
+
+class AllInstitutionsLoadRequested extends AuthEvent {
+  const AllInstitutionsLoadRequested();
+}

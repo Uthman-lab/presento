@@ -6,6 +6,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
   final GetCurrentUserUseCase getCurrentUserUseCase;
   final ResetPasswordUseCase resetPasswordUseCase;
   final GetInstitutionsUseCase getInstitutionsUseCase;
+  final GetAllInstitutionsUseCase getAllInstitutionsUseCase;
   final SelectInstitutionUseCase selectInstitutionUseCase;
 
   AuthBloc({
@@ -14,6 +15,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     required this.getCurrentUserUseCase,
     required this.resetPasswordUseCase,
     required this.getInstitutionsUseCase,
+    required this.getAllInstitutionsUseCase,
     required this.selectInstitutionUseCase,
   }) : super(const AuthInitial()) {
     on<LoginRequested>(_onLoginRequested);
@@ -21,6 +23,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     on<CheckAuthStatus>(_onCheckAuthStatus);
     on<ResetPasswordRequested>(_onResetPasswordRequested);
     on<InstitutionsLoadRequested>(_onInstitutionsLoadRequested);
+    on<AllInstitutionsLoadRequested>(_onAllInstitutionsLoadRequested);
     on<InstitutionSelectionRequested>(_onInstitutionSelectionRequested);
   }
 
@@ -131,6 +134,46 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
     );
   }
 
+  Future<void> _onAllInstitutionsLoadRequested(
+    AllInstitutionsLoadRequested event,
+    Emitter<AuthState> emit,
+  ) async {
+    emit(const AuthLoading());
+
+    // Get current user first
+    final currentUserResult = await getCurrentUserUseCase();
+
+    if (currentUserResult.isLeft()) {
+      emit(
+        AuthError(message: currentUserResult.fold((l) => l.message, (r) => '')),
+      );
+      return;
+    }
+
+    final user = currentUserResult.fold((l) => null, (r) => r);
+    if (user == null) {
+      emit(const Unauthenticated());
+      return;
+    }
+
+    // Only super admin should be able to load all institutions
+    if (!user.isSuperAdmin) {
+      emit(
+        const AuthError(message: 'Only super admin can load all institutions'),
+      );
+      return;
+    }
+
+    // Load all institutions
+    final result = await getAllInstitutionsUseCase();
+
+    result.fold(
+      (failure) => emit(AuthError(message: failure.message)),
+      (institutions) =>
+          emit(AllInstitutionsLoaded(user: user, institutions: institutions)),
+    );
+  }
+
   Future<void> _onInstitutionSelectionRequested(
     InstitutionSelectionRequested event,
     Emitter<AuthState> emit,
@@ -153,16 +196,41 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
       return;
     }
 
-    // Super admin doesn't need institution selection, but handle gracefully if called
+    // Convert empty string to null for clearing
+    final institutionId = event.institutionId.isEmpty
+        ? null
+        : event.institutionId;
+
+    // For super admin, allow clearing institution (setting to null)
+    // and also allow setting an institution for viewing context
     if (user.isSuperAdmin) {
-      emit(Authenticated(user: user));
+      // Call selectInstitution to update Firestore
+      final result = await selectInstitutionUseCase(
+        userEmail: user.email,
+        institutionId: institutionId,
+      );
+
+      result.fold((failure) => emit(AuthError(message: failure.message)), (_) {
+        // Create updated user with selected/cleared institution
+        final updatedUser = User(
+          uid: user.uid,
+          email: user.email,
+          name: user.name,
+          roles: user.roles,
+          currentInstitutionId: institutionId,
+          isSuperAdmin: user.isSuperAdmin,
+          createdAt: user.createdAt,
+          updatedAt: DateTime.now(),
+        );
+        emit(Authenticated(user: updatedUser));
+      });
       return;
     }
 
-    // Await the institution selection
+    // Await the institution selection for regular users
     final result = await selectInstitutionUseCase(
       userEmail: user.email,
-      institutionId: event.institutionId,
+      institutionId: institutionId,
     );
 
     result.fold((failure) => emit(AuthError(message: failure.message)), (_) {
@@ -172,7 +240,7 @@ class AuthBloc extends Bloc<AuthEvent, AuthState> {
         email: user.email,
         name: user.name,
         roles: user.roles,
-        currentInstitutionId: event.institutionId,
+        currentInstitutionId: institutionId,
         isSuperAdmin: user.isSuperAdmin,
         createdAt: user.createdAt,
         updatedAt: DateTime.now(),

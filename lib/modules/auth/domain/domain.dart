@@ -7,6 +7,7 @@ part 'entities/user.dart';
 part 'repositories/auth_repository.dart';
 part 'usecases/get_current_user.dart';
 part 'usecases/get_institutions.dart';
+part 'usecases/get_all_institutions.dart';
 part 'usecases/login.dart';
 part 'usecases/logout.dart';
 part 'usecases/reset_password.dart';

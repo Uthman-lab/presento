@@ -33,16 +33,22 @@ class RouteGuards {
     final authBloc = context.read<AuthBloc>();
     final authState = authBloc.state;
 
-    // Check if user is authenticated
-    if (authState is Authenticated) {
-      return _handleAuthenticatedUser(authState.user, state.uri.path, authBloc);
+    // Handle all authenticated state variants
+    if (authState is Authenticated ||
+        authState is AllInstitutionsLoaded ||
+        authState is InstitutionsLoaded) {
+      // Extract user from any authenticated state variant
+      final user = authState is Authenticated
+          ? authState.user
+          : (authState as dynamic).user as User;
+      return _handleAuthenticatedUser(user, state.uri.path, authBloc);
     } else if (authState is InstitutionSelected) {
       return _handleInstitutionSelected(state.uri.path);
     } else if (authState is Unauthenticated) {
       return _handleUnauthenticated(state.uri.path);
     }
 
-    return null; // No redirect needed
+    return null; // No redirect needed (e.g., AuthLoading, AuthInitial)
   }
 
   static String? _handleAuthenticatedUser(
@@ -81,8 +87,12 @@ class RouteGuards {
   ) {
     // Super admin should not reach here, but handle it just in case
     if (user.isSuperAdmin) {
-      if (currentPath == AppRouter.loginRoute ||
-          currentPath == AppRouter.dashboardRoute) {
+      // If super admin is on dashboard, don't redirect (avoid loop)
+      if (currentPath == AppRouter.dashboardRoute) {
+        return null;
+      }
+      // Only redirect from login to dashboard
+      if (currentPath == AppRouter.loginRoute) {
         return AppRouter.dashboardRoute;
       }
       return null;

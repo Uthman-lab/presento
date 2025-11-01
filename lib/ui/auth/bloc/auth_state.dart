@@ -61,3 +61,15 @@ class InstitutionSelected extends Authenticated {
   @override
   List<Object> get props => [user];
 }
+
+class AllInstitutionsLoaded extends Authenticated {
+  final List<Institution> institutions;
+
+  const AllInstitutionsLoaded({
+    required super.user,
+    required this.institutions,
+  });
+
+  @override
+  List<Object> get props => [user, institutions];
+}
