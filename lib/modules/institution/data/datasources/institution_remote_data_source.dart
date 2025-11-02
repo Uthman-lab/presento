@@ -18,9 +18,7 @@ class InstitutionRemoteDataSourceImpl extends FirebaseBaseDataSource
     implements InstitutionRemoteDataSource {
   final FirebaseFirestore firestore;
 
-  InstitutionRemoteDataSourceImpl({
-    required this.firestore,
-  });
+  InstitutionRemoteDataSourceImpl({required this.firestore});
 
   @override
   Future<List<InstitutionModel>> getInstitutions(
@@ -90,7 +88,7 @@ class InstitutionRemoteDataSourceImpl extends FirebaseBaseDataSource
   }
 
   /// Sanitizes an institution name to be used as a Firestore document ID.
-  /// 
+  ///
   /// Rules:
   /// - Replaces forward slashes with underscores
   /// - Trims whitespace
@@ -99,17 +97,17 @@ class InstitutionRemoteDataSourceImpl extends FirebaseBaseDataSource
   String _sanitizeInstitutionName(String name) {
     // Replace forward slashes with underscores (not allowed in Firestore doc IDs)
     var sanitized = name.replaceAll('/', '_');
-    
+
     // Trim whitespace
     sanitized = sanitized.trim();
-    
+
     // Validate not empty
     if (sanitized.isEmpty) {
       throw const ServerException(
         message: 'Institution name cannot be empty after sanitization',
       );
     }
-    
+
     // Validate length (1,500 bytes max, but we'll check UTF-8 byte length)
     final bytes = utf8.encode(sanitized);
     if (bytes.length > 1500) {
@@ -117,7 +115,7 @@ class InstitutionRemoteDataSourceImpl extends FirebaseBaseDataSource
         message: 'Institution name is too long (max 1,500 bytes)',
       );
     }
-    
+
     return sanitized;
   }
 
@@ -126,19 +124,19 @@ class InstitutionRemoteDataSourceImpl extends FirebaseBaseDataSource
     return executeFirebaseOperation(() async {
       // Sanitize the name to use as document ID
       final sanitizedName = _sanitizeInstitutionName(name);
-      
+
       // Check if institution with this name already exists
       final existingDoc = await firestore
           .collection(AppConstants.institutionsCollection)
           .doc(sanitizedName)
           .get();
-      
+
       if (existingDoc.exists) {
         throw const ServerException(
           message: 'An institution with this name already exists',
         );
       }
-      
+
       final now = DateTime.now();
       final institutionData = <String, dynamic>{
         'name': name, // Store original name in the document
@@ -157,7 +155,7 @@ class InstitutionRemoteDataSourceImpl extends FirebaseBaseDataSource
           .collection(AppConstants.institutionsCollection)
           .doc(sanitizedName)
           .get();
-      
+
       final data = doc.data()!;
       data['id'] = doc.id; // This will be the sanitized name
 
@@ -208,4 +206,3 @@ class InstitutionRemoteDataSourceImpl extends FirebaseBaseDataSource
     });
   }
 }
-

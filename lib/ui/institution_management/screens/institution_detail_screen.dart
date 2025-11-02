@@ -3,36 +3,35 @@ part of '../institution_management.ui.dart';
 class InstitutionDetailScreen extends StatelessWidget {
   final String institutionId;
 
-  const InstitutionDetailScreen({
-    super.key,
-    required this.institutionId,
-  });
+  const InstitutionDetailScreen({super.key, required this.institutionId});
 
   @override
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
 
     return BlocProvider(
-      create: (context) => di.sl<InstitutionManagementBloc>()
-        ..add(LoadInstitution(institutionId: institutionId)),
+      create: (context) =>
+          di.sl<InstitutionManagementBloc>()
+            ..add(LoadInstitution(institutionId: institutionId)),
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Institution Details'),
           backgroundColor: Colors.red,
           foregroundColor: Colors.white,
           actions: [
-            BlocBuilder<InstitutionManagementBloc,
-                InstitutionManagementState>(
+            BlocBuilder<InstitutionManagementBloc, InstitutionManagementState>(
               builder: (context, state) {
                 if (state is InstitutionLoaded) {
                   return IconButton(
                     icon: const Icon(Icons.edit),
                     onPressed: () async {
-                      final result = await context.push('/institutions/${institutionId}/edit');
+                      final result = await context.push(
+                        '/institutions/${institutionId}/edit',
+                      );
                       if (result == true && context.mounted) {
                         context.read<InstitutionManagementBloc>().add(
-                              LoadInstitution(institutionId: institutionId),
-                            );
+                          LoadInstitution(institutionId: institutionId),
+                        );
                       }
                     },
                     tooltip: 'Edit Institution',
@@ -43,8 +42,7 @@ class InstitutionDetailScreen extends StatelessWidget {
             ),
           ],
         ),
-        body: BlocBuilder<InstitutionManagementBloc,
-            InstitutionManagementState>(
+        body: BlocBuilder<InstitutionManagementBloc, InstitutionManagementState>(
           builder: (context, state) {
             if (state is InstitutionManagementLoading) {
               return const Center(child: CircularProgressIndicator());
@@ -89,15 +87,14 @@ class InstitutionDetailScreen extends StatelessWidget {
                                         institution.name,
                                         style: theme.textTheme.headlineSmall
                                             ?.copyWith(
-                                          fontWeight: FontWeight.bold,
-                                        ),
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                                       const SizedBox(height: 4),
                                       Text(
                                         'ID: ${institution.id}',
-                                        style: theme.textTheme.bodySmall?.copyWith(
-                                          color: Colors.grey[600],
-                                        ),
+                                        style: theme.textTheme.bodySmall
+                                            ?.copyWith(color: Colors.grey[600]),
                                       ),
                                     ],
                                   ),
@@ -137,6 +134,42 @@ class InstitutionDetailScreen extends StatelessWidget {
                             ),
                           ],
                         ),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          context.push(
+                            '/institutions/${institution.id}/classes',
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.blue,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        icon: const Icon(Icons.class_),
+                        label: const Text('Manage Classes'),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    SizedBox(
+                      width: double.infinity,
+                      child: ElevatedButton.icon(
+                        onPressed: () {
+                          context.push(
+                            '/institutions/${institution.id}/students',
+                          );
+                        },
+                        style: ElevatedButton.styleFrom(
+                          backgroundColor: Colors.green,
+                          foregroundColor: Colors.white,
+                          padding: const EdgeInsets.symmetric(vertical: 16),
+                        ),
+                        icon: const Icon(Icons.people),
+                        label: const Text('Manage Students'),
                       ),
                     ),
                     const SizedBox(height: 16),
@@ -196,11 +229,7 @@ class InstitutionDetailScreen extends StatelessWidget {
                 child: Column(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Icon(
-                      Icons.error_outline,
-                      size: 64,
-                      color: Colors.red[300],
-                    ),
+                    Icon(Icons.error_outline, size: 64, color: Colors.red[300]),
                     const SizedBox(height: 16),
                     Text(
                       state.message,
@@ -261,4 +290,3 @@ class InstitutionDetailScreen extends StatelessWidget {
         '${date.hour.toString().padLeft(2, '0')}:${date.minute.toString().padLeft(2, '0')}';
   }
 }
-

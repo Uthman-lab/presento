@@ -19,7 +19,7 @@ class TeacherDashboard extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              context.read<AuthBloc>().add(const LogoutRequested());
+              _showLogoutConfirmation(context);
             },
           ),
         ],
@@ -43,11 +43,11 @@ class TeacherDashboard extends StatelessWidget {
             const SizedBox(height: 16),
             QuickActions(
               actions: [
-                QuickAction(
-                  icon: Icons.check_circle,
-                  label: 'Mark\nAttendance',
-                  onTap: () => _showComingSoon(context),
-                ),
+                // QuickAction(
+                //   icon: Icons.check_circle,
+                //   label: 'Mark\nAttendance',
+                //   onTap: () => _navigateToAttendance(context, isMarking: true),
+                // ),
                 QuickAction(
                   icon: Icons.today,
                   label: "Today's\nClasses",
@@ -61,7 +61,7 @@ class TeacherDashboard extends StatelessWidget {
                 QuickAction(
                   icon: Icons.history,
                   label: 'Attendance\nHistory',
-                  onTap: () => _showComingSoon(context),
+                  onTap: () => _navigateToAttendance(context, isMarking: false),
                 ),
               ],
             ),
@@ -140,25 +140,27 @@ class TeacherDashboard extends StatelessWidget {
                   mainAxisSpacing: 16,
                   childAspectRatio: 1.2,
                   children: [
-                    DashboardCard(
-                      icon: Icons.check_circle,
-                      title: 'Mark Attendance',
-                      subtitle: 'Take attendance for your assigned classes',
-                      onTap: () => _showComingSoon(context),
-                      iconColor: Colors.green,
-                    ),
+                    // DashboardCard(
+                    //   icon: Icons.check_circle,
+                    //   title: 'Mark Attendance',
+                    //   subtitle: 'Take attendance for your assigned classes',
+                    //   onTap: () =>
+                    //       _navigateToAttendance(context, isMarking: true),
+                    //   iconColor: Colors.green,
+                    // ),
                     DashboardCard(
                       icon: Icons.class_,
                       title: 'My Classes',
                       subtitle: 'View assigned classes and student rosters',
-                      onTap: () => _showComingSoon(context),
+                      onTap: () => _navigateToClasses(context),
                       iconColor: Colors.blue,
                     ),
                     DashboardCard(
                       icon: Icons.history,
                       title: 'Attendance History',
                       subtitle: 'View past attendance records and trends',
-                      onTap: () => _showComingSoon(context),
+                      onTap: () =>
+                          _navigateToAttendance(context, isMarking: false),
                       iconColor: Colors.orange,
                     ),
                     DashboardCard(
@@ -282,6 +284,81 @@ class TeacherDashboard extends StatelessWidget {
       const SnackBar(
         content: Text('This feature is coming soon!'),
         duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _navigateToAttendance(BuildContext context, {required bool isMarking}) {
+    final authBloc = context.read<AuthBloc>();
+    final state = authBloc.state;
+    String? institutionId;
+
+    if (state is AllInstitutionsLoaded || state is Authenticated) {
+      final user = state is AllInstitutionsLoaded
+          ? state.user
+          : (state as Authenticated).user;
+      institutionId = user.currentInstitutionId;
+    }
+
+    if (institutionId == null || institutionId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an institution first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    // Navigate to classes first, user can select class from there
+    context.push('/institutions/$institutionId/classes');
+  }
+
+  void _navigateToClasses(BuildContext context) {
+    final authBloc = context.read<AuthBloc>();
+    final state = authBloc.state;
+    String? institutionId;
+
+    if (state is AllInstitutionsLoaded || state is Authenticated) {
+      final user = state is AllInstitutionsLoaded
+          ? state.user
+          : (state as Authenticated).user;
+      institutionId = user.currentInstitutionId;
+    }
+
+    if (institutionId == null || institutionId.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please select an institution first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
+
+    context.push('/institutions/$institutionId/classes');
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<AuthBloc>().add(const LogoutRequested());
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Logout'),
+          ),
+        ],
       ),
     );
   }

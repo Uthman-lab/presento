@@ -19,7 +19,7 @@ class InstitutionAdminDashboard extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              context.read<AuthBloc>().add(const LogoutRequested());
+              _showLogoutConfirmation(context);
             },
           ),
         ],
@@ -145,7 +145,32 @@ class InstitutionAdminDashboard extends StatelessWidget {
                       title: 'Class Management',
                       subtitle:
                           'Create and manage classes within the institution',
-                      onTap: () => _showComingSoon(context),
+                      onTap: () {
+                        final authBloc = context.read<AuthBloc>();
+                        final state = authBloc.state;
+                        String? institutionId;
+
+                        if (state is AllInstitutionsLoaded ||
+                            state is Authenticated) {
+                          final user = state is AllInstitutionsLoaded
+                              ? state.user
+                              : (state as Authenticated).user;
+                          institutionId = user.currentInstitutionId;
+                        }
+
+                        if (institutionId != null && institutionId.isNotEmpty) {
+                          context.push('/institutions/$institutionId/classes');
+                        } else {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(
+                              content: Text(
+                                'Please select an institution first',
+                              ),
+                              backgroundColor: Colors.orange,
+                            ),
+                          );
+                        }
+                      },
                       iconColor: Colors.blue,
                     ),
                     DashboardCard(
@@ -164,16 +189,19 @@ class InstitutionAdminDashboard extends StatelessWidget {
                         final authBloc = context.read<AuthBloc>();
                         final state = authBloc.state;
                         String? institutionId;
-                        
-                        if (state is AllInstitutionsLoaded || state is Authenticated) {
-                          final user = state is AllInstitutionsLoaded 
-                              ? state.user 
+
+                        if (state is AllInstitutionsLoaded ||
+                            state is Authenticated) {
+                          final user = state is AllInstitutionsLoaded
+                              ? state.user
                               : (state as Authenticated).user;
                           institutionId = user.currentInstitutionId;
                         }
-                        
+
                         if (institutionId != null && institutionId.isNotEmpty) {
-                          context.push('${AppRouter.usersRoute}?institutionId=$institutionId');
+                          context.push(
+                            '${AppRouter.usersRoute}?institutionId=$institutionId',
+                          );
                         } else {
                           context.push(AppRouter.usersRoute);
                         }
@@ -218,6 +246,30 @@ class InstitutionAdminDashboard extends StatelessWidget {
       const SnackBar(
         content: Text('This feature is coming soon!'),
         duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<AuthBloc>().add(const LogoutRequested());
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Logout'),
+          ),
+        ],
       ),
     );
   }

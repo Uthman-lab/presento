@@ -10,6 +10,10 @@ class AppConstants {
   // Firestore Collections
   static const String usersCollection = 'users';
   static const String institutionsCollection = 'institutions';
+  static const String classesCollection = 'classes';
+  static const String studentsCollection = 'students';
+  static const String attendanceCollection = 'attendance';
+  static const String attendanceRecordsCollection = 'records';
 
   // Error Messages
   static const String networkErrorMessage =

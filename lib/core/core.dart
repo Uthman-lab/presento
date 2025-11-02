@@ -5,6 +5,9 @@ import 'package:presento/ui/auth/auth.ui.dart' hide InstitutionsLoaded;
 import 'package:presento/ui/dashboard/screens/dashboard_router.dart';
 import 'package:presento/ui/user_management/user_management.ui.dart';
 import 'package:presento/ui/institution_management/institution_management.ui.dart';
+import 'package:presento/ui/class_management/class_management.ui.dart';
+import 'package:presento/ui/student_management/student_management.ui.dart';
+import 'package:presento/ui/attendance_management/attendance_management.ui.dart';
 import 'package:presento/core/di/injection_container.dart' as di;
 
 part 'error/exceptions.dart';

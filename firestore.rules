@@ -34,7 +34,7 @@ service cloud.firestore {
     function canMarkAttendance(institutionId) {
       return isSuperAdmin() || (
         hasInstitutionAccess(institutionId) 
-        && getUserRole(institutionId) in ['admin', 'supervisor', 'class_rep']
+        && getUserRole(institutionId) in ['admin', 'supervisor', 'class_rep', 'teacher']
       );
     }
     

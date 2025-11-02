@@ -35,16 +35,46 @@ class RouteGuards {
 
     // Check if route requires super admin access
     final currentPath = state.uri.path;
-    final isInstitutionRoute =
+    final isInstitutionManagementRoute =
         currentPath == AppRouter.institutionsRoute ||
-        currentPath == AppRouter.createInstitutionRoute ||
-        currentPath.startsWith('/institutions/');
+        currentPath == AppRouter.createInstitutionRoute;
 
-    if (isInstitutionRoute) {
+    if (isInstitutionManagementRoute) {
       final user = _getUserFromState(authState);
       if (user == null || !user.isSuperAdmin) {
         return AppRouter
             .dashboardRoute; // Redirect non-super admins to dashboard
+      }
+    }
+
+    // Check institution subroutes (classes, students, attendance, etc.)
+    // These should be accessible if user has access to that institution
+    if (currentPath.startsWith('/institutions/') &&
+        !isInstitutionManagementRoute) {
+      final institutionIdMatch = RegExp(
+        r'/institutions/([^/]+)',
+      ).firstMatch(currentPath);
+      if (institutionIdMatch != null) {
+        final institutionId = institutionIdMatch.group(1);
+        final user = _getUserFromState(authState);
+
+        // Super admin has access to all institutions
+        if (user != null && user.isSuperAdmin) {
+          // Allow access
+        } else if (user != null && institutionId != null) {
+          // Check if user has access to this institution
+          final hasAccess =
+              user.isSuperAdmin ||
+              (user.currentInstitutionId == institutionId) ||
+              (user.roles.containsKey(institutionId) &&
+                  user.roles[institutionId]?.isActive == true);
+
+          if (!hasAccess) {
+            return AppRouter.dashboardRoute;
+          }
+        } else if (user == null) {
+          return AppRouter.loginRoute;
+        }
       }
     }
 
@@ -67,9 +97,12 @@ class RouteGuards {
   }
 
   static User? _getUserFromState(AuthState authState) {
+    // All these states extend Authenticated or have user property
     if (authState is Authenticated) {
       return authState.user;
     }
+    // InstitutionsLoaded, AllInstitutionsLoaded, and InstitutionSelected extend Authenticated
+    // so they can be accessed through the Authenticated interface
     return null;
   }
 

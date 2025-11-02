@@ -84,6 +84,7 @@ class _InstitutionRoleEditorState extends State<InstitutionRoleEditor> {
                               ),
                               items:
                                   [
+                                    adminRole,
                                     teacherRole,
                                     studentRole,
                                     classRepresentativeRole,
@@ -141,6 +142,8 @@ class _InstitutionRoleEditorState extends State<InstitutionRoleEditor> {
 
   String _getRoleDisplayName(String role) {
     switch (role) {
+      case 'admin':
+        return 'Institution Administrator';
       case 'teacher':
         return 'Teacher';
       case 'student':
@@ -161,6 +164,8 @@ class _InstitutionRoleEditorState extends State<InstitutionRoleEditor> {
 
     // Normalize legacy/variant role names to canonical forms
     switch (role.toLowerCase()) {
+      case 'admin':
+        return adminRole;
       case 'class_representative':
       case 'class_rep':
         return classRepresentativeRole;

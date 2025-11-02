@@ -287,9 +287,10 @@ class _InstitutionManagementScreenState
                                   return InstitutionListItem(
                                     institution: institution,
                                     onTap: () {
-                                      // Navigate to detail screen if needed
-                                      // For now, just edit
-                                      _handleEdit(institution);
+                                      // Navigate to detail screen to access classes and other options
+                                      context.push(
+                                        '/institutions/${institution.id}',
+                                      );
                                     },
                                     onEdit: () => _handleEdit(institution),
                                     onDelete: () => _handleDelete(institution),

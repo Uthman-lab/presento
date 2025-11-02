@@ -19,7 +19,7 @@ class ClassRepresentativeDashboard extends StatelessWidget {
           IconButton(
             icon: const Icon(Icons.logout),
             onPressed: () {
-              context.read<AuthBloc>().add(const LogoutRequested());
+              _showLogoutConfirmation(context);
             },
           ),
         ],
@@ -181,13 +181,13 @@ class ClassRepresentativeDashboard extends StatelessWidget {
                   mainAxisSpacing: 16,
                   childAspectRatio: 1.2,
                   children: [
-                    DashboardCard(
-                      icon: Icons.check_circle,
-                      title: 'Mark Attendance',
-                      subtitle: 'Take attendance for your assigned class',
-                      onTap: () => _showComingSoon(context),
-                      iconColor: Colors.green,
-                    ),
+                    // DashboardCard(
+                    //   icon: Icons.check_circle,
+                    //   title: 'Mark Attendance',
+                    //   subtitle: 'Take attendance for your assigned class',
+                    //   onTap: () => _showComingSoon(context),
+                    //   iconColor: Colors.green,
+                    // ),
                     DashboardCard(
                       icon: Icons.groups,
                       title: 'Class Roster',
@@ -317,6 +317,30 @@ class ClassRepresentativeDashboard extends StatelessWidget {
       const SnackBar(
         content: Text('This feature is coming soon!'),
         duration: Duration(seconds: 2),
+      ),
+    );
+  }
+
+  void _showLogoutConfirmation(BuildContext context) {
+    showDialog(
+      context: context,
+      builder: (dialogContext) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(dialogContext),
+            child: const Text('Cancel'),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(dialogContext);
+              context.read<AuthBloc>().add(const LogoutRequested());
+            },
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Logout'),
+          ),
+        ],
       ),
     );
   }
