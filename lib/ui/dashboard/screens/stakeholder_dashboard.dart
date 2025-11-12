@@ -1,4 +1,3 @@
-import 'package:flutter/material.dart';
 import 'package:presento/imports.dart';
 import 'package:presento/ui/auth/auth.ui.dart';
 import 'package:presento/ui/dashboard/widgets/dashboard_widgets.dart';
@@ -294,7 +293,7 @@ class StakeholderDashboard extends StatelessWidget {
         children: [
           CircleAvatar(
             radius: 20,
-            backgroundColor: theme.primaryColor.withOpacity(0.1),
+            backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
             child: Icon(Icons.person, size: 20, color: theme.primaryColor),
           ),
           const SizedBox(width: 12),
@@ -320,9 +319,9 @@ class StakeholderDashboard extends StatelessWidget {
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
             decoration: BoxDecoration(
-              color: rateColor.withOpacity(0.1),
+              color: rateColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: rateColor.withOpacity(0.3)),
+              border: Border.all(color: rateColor.withValues(alpha: 0.3)),
             ),
             child: Text(
               attendanceRate,

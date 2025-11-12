@@ -26,7 +26,7 @@ class InstitutionDetailScreen extends StatelessWidget {
                     icon: const Icon(Icons.edit),
                     onPressed: () async {
                       final result = await context.push(
-                        '/institutions/${institutionId}/edit',
+                        '/institutions/$institutionId/edit',
                       );
                       if (result == true && context.mounted) {
                         context.read<InstitutionManagementBloc>().add(

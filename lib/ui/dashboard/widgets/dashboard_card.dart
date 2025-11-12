@@ -25,7 +25,7 @@ class DashboardCard extends StatelessWidget {
     final theme = Theme.of(context);
     final textColor = isEnabled
         ? theme.textTheme.bodyLarge?.color
-        : theme.textTheme.bodyLarge?.color?.withOpacity(0.5);
+        : theme.textTheme.bodyLarge?.color?.withValues(alpha: 0.5);
     final iconColorFinal = iconColor ?? theme.primaryColor;
 
     return Card(
@@ -46,7 +46,7 @@ class DashboardCard extends StatelessWidget {
                     size: 32,
                     color: isEnabled
                         ? iconColorFinal
-                        : iconColorFinal.withOpacity(0.5),
+                        : iconColorFinal.withValues(alpha: 0.5),
                   ),
                   if (badge != null) ...[
                     const Spacer(),

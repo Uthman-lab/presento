@@ -80,13 +80,13 @@ class SuperAdminInstitutionSelector extends StatelessWidget {
         margin: const EdgeInsets.only(bottom: 8),
         decoration: BoxDecoration(
           color: isSelected
-              ? theme.primaryColor.withOpacity(0.1)
+              ? theme.primaryColor.withValues(alpha: 0.1)
               : Colors.transparent,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
             color: isSelected
                 ? theme.primaryColor
-                : Colors.grey.withOpacity(0.3),
+                : Colors.grey.withValues(alpha: 0.3),
             width: isSelected ? 2 : 1,
           ),
         ),
@@ -118,7 +118,7 @@ class SuperAdminInstitutionSelector extends StatelessWidget {
 
   Widget _buildDropdownSelector(BuildContext context) {
     return DropdownButtonFormField<String>(
-      value: selectedInstitutionId,
+      initialValue: selectedInstitutionId,
       decoration: InputDecoration(
         labelText: 'Select Institution',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

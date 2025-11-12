@@ -65,7 +65,9 @@ class _InstitutionManagementScreenState
 
   void _handleEdit(Institution institution) async {
     final result = await context.push('/institutions/${institution.id}/edit');
-    if (result == true && mounted) {
+    if (!context.mounted) return;
+
+    if (result == true) {
       _refreshInstitutions();
       // Refresh AuthBloc's institutions list so other screens stay in sync
       context.read<AuthBloc>().add(const AllInstitutionsLoadRequested());
@@ -137,7 +139,9 @@ class _InstitutionManagementScreenState
                 final result = await context.push(
                   AppRouter.createInstitutionRoute,
                 );
-                if (result == true && mounted) {
+                if (!context.mounted) return;
+
+                if (result == true) {
                   _refreshInstitutions();
                   // Refresh AuthBloc's institutions list so other screens stay in sync
                   context.read<AuthBloc>().add(

@@ -52,7 +52,7 @@ class UserInfoHeader extends StatelessWidget {
                 // Profile Picture Placeholder
                 CircleAvatar(
                   radius: 30,
-                  backgroundColor: theme.primaryColor.withOpacity(0.1),
+                  backgroundColor: theme.primaryColor.withValues(alpha: 0.1),
                   child: Icon(roleIcon, size: 32, color: theme.primaryColor),
                 ),
                 const SizedBox(width: 16),

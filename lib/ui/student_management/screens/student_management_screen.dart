@@ -281,7 +281,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             maxWidth: 250,
                           ),
                           child: DropdownButtonFormField<String>(
-                            value: _selectedClassFilter,
+                            initialValue: _selectedClassFilter,
                             decoration: InputDecoration(
                               labelText: 'Filter by Class',
                               hintText: 'All Classes',
@@ -299,12 +299,12 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                 value: null,
                                 child: Text('All Classes'),
                               ),
-                              ..._classes.map((classEntity) {
-                                return DropdownMenuItem<String>(
+                              ..._classes.map(
+                                (classEntity) => DropdownMenuItem<String>(
                                   value: classEntity.id,
                                   child: Text(classEntity.name),
-                                );
-                              }).toList(),
+                                ),
+                              ),
                             ],
                             onChanged: _isLoadingClasses
                                 ? null
@@ -320,7 +320,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             maxWidth: 250,
                           ),
                           child: DropdownButtonFormField<StudentSortOption>(
-                            value: currentSort,
+                            initialValue: currentSort,
                             decoration: InputDecoration(
                               labelText: 'Sort By',
                               border: OutlineInputBorder(

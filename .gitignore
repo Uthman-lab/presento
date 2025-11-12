@@ -79,3 +79,5 @@ tasks/
 .cursor/
 .taskmaster/
 
+# FVM Version Cache
+.fvm/

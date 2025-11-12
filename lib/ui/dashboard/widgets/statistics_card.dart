@@ -22,7 +22,7 @@ class StatisticsCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final cardColor = color ?? theme.primaryColor;
-    final backgroundColor = cardColor.withOpacity(0.1);
+    final backgroundColor = cardColor.withValues(alpha: 0.1);
 
     return Card(
       elevation: 2,
@@ -72,7 +72,7 @@ class StatisticsCard extends StatelessWidget {
             Text(
               label,
               style: theme.textTheme.bodyMedium?.copyWith(
-                color: theme.textTheme.bodyMedium?.color?.withOpacity(0.7),
+                color: theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.7),
               ),
             ),
             if (trend != null) ...[

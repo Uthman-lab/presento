@@ -175,7 +175,8 @@ class _UserDetailScreenState extends State<UserDetailScreen> {
                   _initializeControllers(state.user!);
                 } else {
                   // If user is null, it's a delete operation - navigate back
-                  Future.microtask(() => context.pop());
+                  final navigator = Navigator.of(context);
+                  Future.microtask(() => navigator.pop());
                 }
               } else if (state is UserManagementError) {
                 ScaffoldMessenger.of(context).showSnackBar(

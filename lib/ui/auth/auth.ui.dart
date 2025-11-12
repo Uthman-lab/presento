@@ -1,5 +1,4 @@
 import 'package:presento/imports.dart';
-import 'package:presento/core/core.dart';
 import 'package:presento/modules/institution/domain/domain.dart';
 import '../../modules/auth/domain/domain.dart';
 

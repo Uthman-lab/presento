@@ -171,12 +171,13 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
     return IconButton(
       icon: Icon(
         icon,
-        color: isActive ? color : color.withOpacity(0.4),
+        color: isActive ? color : color.withValues(alpha: 0.4),
       ),
       onPressed: onPressed,
       tooltip: tooltip,
       style: IconButton.styleFrom(
-        backgroundColor: isActive ? color.withOpacity(0.2) : Colors.transparent,
+        backgroundColor:
+            isActive ? color.withValues(alpha: 0.2) : Colors.transparent,
         side: isActive ? BorderSide(color: color, width: 2) : null,
       ),
     );
@@ -405,7 +406,8 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
                                   ? Chip(
                                       label: Text(_getStatusLabel(status)),
                                       backgroundColor:
-                                          _getStatusColor(status).withOpacity(0.2),
+                                          _getStatusColor(status)
+                                              .withValues(alpha: 0.2),
                                       avatar: Icon(
                                         Icons.circle,
                                         size: 12,
@@ -452,7 +454,7 @@ class _AttendanceMarkingScreenState extends State<AttendanceMarkingScreen> {
   Widget _buildStatChip(String label, int count, Color color) {
     return Chip(
       label: Text('$label: $count'),
-      backgroundColor: color.withOpacity(0.2),
+      backgroundColor: color.withValues(alpha: 0.2),
       avatar: CircleAvatar(
         backgroundColor: color,
         radius: 10,

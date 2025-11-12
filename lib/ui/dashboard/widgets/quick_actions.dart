@@ -50,14 +50,14 @@ class _QuickActionButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final backgroundColor = action.isEnabled
-        ? theme.primaryColor.withOpacity(0.1)
-        : theme.primaryColor.withOpacity(0.05);
+        ? theme.primaryColor.withValues(alpha: 0.1)
+        : theme.primaryColor.withValues(alpha: 0.05);
     final iconColor = action.isEnabled
         ? theme.primaryColor
-        : theme.primaryColor.withOpacity(0.5);
+        : theme.primaryColor.withValues(alpha: 0.5);
     final textColor = action.isEnabled
         ? theme.textTheme.bodyMedium?.color
-        : theme.textTheme.bodyMedium?.color?.withOpacity(0.5);
+        : theme.textTheme.bodyMedium?.color?.withValues(alpha: 0.5);
 
     return InkWell(
       onTap: action.isEnabled ? action.onTap : null,
@@ -69,7 +69,7 @@ class _QuickActionButton extends StatelessWidget {
           color: backgroundColor,
           borderRadius: BorderRadius.circular(8),
           border: Border.all(
-            color: theme.primaryColor.withOpacity(0.2),
+            color: theme.primaryColor.withValues(alpha: 0.2),
             width: 1,
           ),
         ),

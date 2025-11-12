@@ -40,7 +40,7 @@ class StatusFilterDropdown extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return DropdownButtonFormField<StatusFilterOption>(
-      value: _getCurrentOption(),
+      initialValue: _getCurrentOption(),
       isExpanded: true,
       decoration: InputDecoration(
         labelText: 'Status Filter',

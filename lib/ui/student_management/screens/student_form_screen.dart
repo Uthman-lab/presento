@@ -242,7 +242,7 @@ class _StudentFormScreenState extends State<StudentFormScreen> {
                   )
                 else
                   DropdownButtonFormField<String>(
-                    value: _selectedClassId,
+                    initialValue: _selectedClassId,
                     decoration: const InputDecoration(
                       labelText: 'Class',
                       hintText: 'Select a class',

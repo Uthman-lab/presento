@@ -1,6 +1,5 @@
 import 'package:presento/imports.dart';
 import 'package:presento/modules/auth/auth.dart';
-import 'package:presento/ui/auth/auth.ui.dart';
 import '../dashboard.ui.dart';
 
 class DashboardRouter extends StatelessWidget {

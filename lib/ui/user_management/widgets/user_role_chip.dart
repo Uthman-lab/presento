@@ -43,8 +43,8 @@ class UserRoleChip extends StatelessWidget {
           fontWeight: FontWeight.w500,
         ),
       ),
-      backgroundColor: chipColor.withOpacity(0.1),
-      side: BorderSide(color: chipColor.withOpacity(0.3)),
+      backgroundColor: chipColor.withValues(alpha: 0.1),
+      side: BorderSide(color: chipColor.withValues(alpha: 0.3)),
       padding: const EdgeInsets.symmetric(horizontal: 4),
       materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
     );
