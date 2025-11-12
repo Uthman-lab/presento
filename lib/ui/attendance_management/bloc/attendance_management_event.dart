@@ -142,3 +142,4 @@ class LoadAttendanceRecords extends AttendanceManagementEvent {
   List<Object> get props => [institutionId, attendanceId];
 }
 
+

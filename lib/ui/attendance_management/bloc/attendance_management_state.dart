@@ -82,3 +82,4 @@ class AttendanceManagementError extends AttendanceManagementState {
   List<Object> get props => [message];
 }
 
+

@@ -63,3 +63,4 @@ class AttendanceRecordEntity extends Equatable {
       ];
 }
 
+

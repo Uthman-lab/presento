@@ -64,3 +64,4 @@ class ClassRepositoryImpl extends BaseRepository implements ClassRepository {
   }
 }
 
+

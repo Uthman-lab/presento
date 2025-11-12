@@ -19,3 +19,4 @@ class ClassEntity extends Equatable {
   List<Object?> get props => [id, name, description, createdAt, updatedAt];
 }
 
+

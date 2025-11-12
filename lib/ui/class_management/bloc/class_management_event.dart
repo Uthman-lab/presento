@@ -123,3 +123,4 @@ class SortClasses extends ClassManagementEvent {
   List<Object?> get props => [institutionId, sortOption, searchQuery];
 }
 
+

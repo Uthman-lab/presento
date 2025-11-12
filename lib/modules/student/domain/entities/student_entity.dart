@@ -34,3 +34,4 @@ class StudentEntity extends Equatable {
       ];
 }
 
+

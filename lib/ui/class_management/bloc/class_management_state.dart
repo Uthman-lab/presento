@@ -90,3 +90,4 @@ class ClassManagementError extends ClassManagementState {
   List<Object> get props => [message];
 }
 
+

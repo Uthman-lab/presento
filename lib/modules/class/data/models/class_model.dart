@@ -40,3 +40,4 @@ class ClassModel extends ClassEntity {
   }
 }
 
+
