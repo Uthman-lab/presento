@@ -12,8 +12,8 @@ class SortDropdown extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return DropdownButtonFormField<UserSortOption>(
-      initialValue: currentSort,
+    return CustomDropdownButtonFormField<UserSortOption>(
+      value: currentSort,
       isExpanded: true,
       decoration: InputDecoration(
         labelText: 'Sort By',

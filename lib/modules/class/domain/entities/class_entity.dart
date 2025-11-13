@@ -20,3 +20,4 @@ class ClassEntity extends Equatable {
 }
 
 
+

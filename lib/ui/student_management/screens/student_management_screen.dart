@@ -3,10 +3,7 @@ part of '../student_management.ui.dart';
 class StudentManagementScreen extends StatefulWidget {
   final String institutionId;
 
-  const StudentManagementScreen({
-    super.key,
-    required this.institutionId,
-  });
+  const StudentManagementScreen({super.key, required this.institutionId});
 
   @override
   State<StudentManagementScreen> createState() =>
@@ -27,11 +24,11 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (mounted) {
         context.read<StudentManagementBloc>().add(
-              LoadStudents(
-                institutionId: widget.institutionId,
-                sortOption: StudentSortOption.createdAtDesc,
-              ),
-            );
+          LoadStudents(
+            institutionId: widget.institutionId,
+            sortOption: StudentSortOption.createdAtDesc,
+          ),
+        );
       }
     });
   }
@@ -51,9 +48,7 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
 
     try {
       final classManagementBloc = context.read<ClassManagementBloc>();
-      classManagementBloc.add(
-        LoadClasses(institutionId: widget.institutionId),
-      );
+      classManagementBloc.add(LoadClasses(institutionId: widget.institutionId));
 
       await classManagementBloc.stream.firstWhere(
         (state) => state is ClassesLoaded || state is ClassManagementError,
@@ -190,11 +185,11 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
             onPressed: () {
               Navigator.pop(context);
               outerContext.read<StudentManagementBloc>().add(
-                    DeleteStudent(
-                      institutionId: widget.institutionId,
-                      studentId: studentEntity.studentId,
-                    ),
-                  );
+                DeleteStudent(
+                  institutionId: widget.institutionId,
+                  studentId: studentEntity.studentId,
+                ),
+              );
             },
             style: TextButton.styleFrom(foregroundColor: Colors.red),
             child: const Text('Delete'),
@@ -280,8 +275,8 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             minWidth: 150,
                             maxWidth: 250,
                           ),
-                          child: DropdownButtonFormField<String>(
-                            initialValue: _selectedClassFilter,
+                          child: CustomDropdownButtonFormField<String>(
+                            value: _selectedClassFilter,
                             decoration: InputDecoration(
                               labelText: 'Filter by Class',
                               hintText: 'All Classes',
@@ -319,31 +314,32 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                             minWidth: 150,
                             maxWidth: 250,
                           ),
-                          child: DropdownButtonFormField<StudentSortOption>(
-                            initialValue: currentSort,
-                            decoration: InputDecoration(
-                              labelText: 'Sort By',
-                              border: OutlineInputBorder(
-                                borderRadius: BorderRadius.circular(8),
+                          child:
+                              CustomDropdownButtonFormField<StudentSortOption>(
+                                value: currentSort,
+                                decoration: InputDecoration(
+                                  labelText: 'Sort By',
+                                  border: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                    horizontal: 12,
+                                    vertical: 16,
+                                  ),
+                                  prefixIcon: const Icon(Icons.sort),
+                                ),
+                                items: StudentSortOption.values.map((option) {
+                                  return DropdownMenuItem<StudentSortOption>(
+                                    value: option,
+                                    child: Text(option.displayName),
+                                  );
+                                }).toList(),
+                                onChanged: (value) {
+                                  if (value != null) {
+                                    _onSortChanged(value);
+                                  }
+                                },
                               ),
-                              contentPadding: const EdgeInsets.symmetric(
-                                horizontal: 12,
-                                vertical: 16,
-                              ),
-                              prefixIcon: const Icon(Icons.sort),
-                            ),
-                            items: StudentSortOption.values.map((option) {
-                              return DropdownMenuItem<StudentSortOption>(
-                                value: option,
-                                child: Text(option.displayName),
-                              );
-                            }).toList(),
-                            onChanged: (value) {
-                              if (value != null) {
-                                _onSortChanged(value);
-                              }
-                            },
-                          ),
                         ),
                       ],
                     ),
@@ -378,13 +374,10 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
 
                 // Student list
                 Expanded(
-                  child: BlocBuilder<StudentManagementBloc,
-                      StudentManagementState>(
+                  child: BlocBuilder<StudentManagementBloc, StudentManagementState>(
                     builder: (context, state) {
                       if (state is StudentManagementLoading) {
-                        return const Center(
-                          child: CircularProgressIndicator(),
-                        );
+                        return const Center(child: CircularProgressIndicator());
                       }
 
                       if (state is StudentsLoaded) {
@@ -404,10 +397,11 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                                           state.searchQuery!.isNotEmpty
                                       ? 'No students found matching "${state.searchQuery}"'
                                       : state.classId != null
-                                          ? 'No students found in selected class'
-                                          : 'No students found',
-                                  style: theme.textTheme.titleMedium
-                                      ?.copyWith(color: Colors.grey[600]),
+                                      ? 'No students found in selected class'
+                                      : 'No students found',
+                                  style: theme.textTheme.titleMedium?.copyWith(
+                                    color: Colors.grey[600],
+                                  ),
                                 ),
                               ],
                             ),
@@ -448,8 +442,9 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
                               const SizedBox(height: 16),
                               Text(
                                 state.message,
-                                style: theme.textTheme.titleMedium
-                                    ?.copyWith(color: Colors.red[700]),
+                                style: theme.textTheme.titleMedium?.copyWith(
+                                  color: Colors.red[700],
+                                ),
                                 textAlign: TextAlign.center,
                               ),
                               const SizedBox(height: 16),
@@ -474,4 +469,3 @@ class _StudentManagementScreenState extends State<StudentManagementScreen> {
     );
   }
 }
-

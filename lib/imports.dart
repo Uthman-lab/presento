@@ -33,3 +33,6 @@ export 'package:intl/intl.dart' hide TextDirection;
 
 // Core
 export 'core/core.dart';
+
+// Shared UI
+export 'ui/shared/widgets/custom_dropdown_button_form_field.dart';

@@ -241,8 +241,8 @@ class _StudentFormScreenState extends State<StudentFormScreen> {
                     child: Center(child: CircularProgressIndicator()),
                   )
                 else
-                  DropdownButtonFormField<String>(
-                    initialValue: _selectedClassId,
+                  CustomDropdownButtonFormField<String>(
+                    value: _selectedClassId,
                     decoration: const InputDecoration(
                       labelText: 'Class',
                       hintText: 'Select a class',

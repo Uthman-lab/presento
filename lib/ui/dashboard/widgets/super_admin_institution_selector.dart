@@ -117,8 +117,8 @@ class SuperAdminInstitutionSelector extends StatelessWidget {
   }
 
   Widget _buildDropdownSelector(BuildContext context) {
-    return DropdownButtonFormField<String>(
-      initialValue: selectedInstitutionId,
+    return CustomDropdownButtonFormField<String>(
+      value: selectedInstitutionId,
       decoration: InputDecoration(
         labelText: 'Select Institution',
         border: OutlineInputBorder(borderRadius: BorderRadius.circular(8)),

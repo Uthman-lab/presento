@@ -181,8 +181,8 @@ class _ClassManagementScreenState extends State<ClassManagementScreen> {
                   child: Row(
                     children: [
                       Expanded(
-                        child: DropdownButtonFormField<ClassSortOption>(
-                          initialValue: currentSort,
+                        child: CustomDropdownButtonFormField<ClassSortOption>(
+                          value: currentSort,
                           decoration: InputDecoration(
                             labelText: 'Sort By',
                             border: OutlineInputBorder(

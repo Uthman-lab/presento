@@ -188,8 +188,8 @@ class _InstitutionManagementScreenState
                   child: Row(
                     children: [
                       Expanded(
-                        child: DropdownButtonFormField<InstitutionSortOption>(
-                          initialValue: currentSort,
+                        child: CustomDropdownButtonFormField<InstitutionSortOption>(
+                          value: currentSort,
                           decoration: InputDecoration(
                             labelText: 'Sort By',
                             border: OutlineInputBorder(

@@ -76,8 +76,8 @@ class _InstitutionRoleEditorState extends State<InstitutionRoleEditor> {
                         padding: const EdgeInsets.all(16),
                         child: Column(
                           children: [
-                            DropdownButtonFormField<String>(
-                              initialValue: _normalizeRole(currentRole.role),
+                            CustomDropdownButtonFormField<String>(
+                              value: _normalizeRole(currentRole.role),
                               decoration: const InputDecoration(
                                 labelText: 'Role',
                                 border: OutlineInputBorder(),
